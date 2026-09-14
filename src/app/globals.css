@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-midnight: #0a0e27;
+  --color-navy: #12183b;
+  --color-navy-light: #1e2654;
+  --color-navy-lighter: #2a3368;
+  --color-amber: #f59e0b;
+  --color-amber-light: #fbbf24;
+  --color-amber-glow: #f59e0b33;
+  --color-orange: #f97316;
+  --color-orange-deep: #ea580c;
+  --color-lavender: #8b5cf6;
+  --color-mint: #10b981;
+  --color-rose: #f43f5e;
+  --color-soft-white: #f0f0f5;
+  --color-muted: #94a3b8;
+  --color-muted-dark: #64748b;
+
+  --font-sans: var(--font-dm-sans);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-navy-lighter) transparent;
+}
+
+body {
+  background: var(--color-midnight);
+  color: var(--color-soft-white);
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in-slow {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.15); opacity: 0.8; }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+}
+
+.animate-fade-in-slow {
+  animation: fade-in-slow 1.2s ease-out forwards;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 3s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-breathe {
+  animation: breathe 6s ease-in-out infinite;
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-500 { animation-delay: 0.5s; }
+.delay-700 { animation-delay: 0.7s; }
+
+.glow-amber {
+  box-shadow: 0 0 40px var(--color-amber-glow), 0 0 80px var(--color-amber-glow);
+}
