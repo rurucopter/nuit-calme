@@ -112,23 +112,23 @@ export default function VerdictPage() {
           </div>
         )}
 
-        {/* CTA */}
+        {/* CTA — push to paywall */}
         <div
           className={`w-full space-y-3 transition-all duration-700 delay-1000 ${
             revealed ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
           <Link
-            href="/plan"
+            href="/offre"
             className="block w-full text-center px-8 py-4 rounded-2xl glass-btn-solid text-midnight font-semibold text-lg hover:scale-[1.01] active:scale-[0.99]"
           >
-            Voir mon plan personnalise
+            Debloquer mon programme
           </Link>
           <Link
-            href="/ritual"
-            className="block w-full text-center px-8 py-3 rounded-2xl glass-btn text-amber hover:text-amber-light"
+            href="/dashboard"
+            className="block w-full text-center px-8 py-3 rounded-2xl glass-btn text-amber hover:text-amber-light text-sm"
           >
-            Lancer le rituel du soir
+            Voir mon tableau de bord
           </Link>
         </div>
       </div>
