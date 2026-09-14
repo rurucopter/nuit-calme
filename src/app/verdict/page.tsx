@@ -65,7 +65,7 @@ export default function VerdictPage() {
             revealed ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          <div className="inline-block px-6 py-3 rounded-2xl bg-amber/10 border border-amber/20">
+          <div className="inline-block px-6 py-3 rounded-2xl glass-accent">
             <p className="text-3xl font-bold text-amber">{verdict.stat}</p>
             <p className="text-xs text-amber/70 mt-1">{verdict.statLabel}</p>
           </div>
@@ -92,7 +92,7 @@ export default function VerdictPage() {
         {/* Secondary causes */}
         {verdict.secondaryCauses.length > 0 && (
           <div
-            className={`w-full p-4 rounded-2xl bg-navy-light/50 border border-navy-lighter/50 mb-8 transition-all duration-700 delay-1000 ${
+            className={`w-full p-4 rounded-2xl glass mb-8 transition-all duration-700 delay-1000 ${
               revealed ? "opacity-100" : "opacity-0"
             }`}
           >
@@ -103,7 +103,7 @@ export default function VerdictPage() {
               {verdict.secondaryCauses.map((cause) => (
                 <span
                   key={cause}
-                  className="px-3 py-1 rounded-full bg-navy-lighter/60 text-xs text-muted"
+                  className="px-3 py-1 rounded-full glass-light text-xs text-muted"
                 >
                   {causeIcons[cause]} {causeLabel(cause)}
                 </span>
@@ -120,13 +120,13 @@ export default function VerdictPage() {
         >
           <Link
             href="/plan"
-            className="block w-full text-center px-8 py-4 rounded-2xl bg-gradient-to-r from-amber to-orange text-midnight font-semibold text-lg hover:shadow-lg hover:shadow-amber/25 transition-all hover:scale-[1.01] active:scale-[0.99]"
+            className="block w-full text-center px-8 py-4 rounded-2xl glass-btn-solid text-midnight font-semibold text-lg hover:scale-[1.01] active:scale-[0.99]"
           >
             Voir mon plan personnalise
           </Link>
           <Link
             href="/ritual"
-            className="block w-full text-center px-8 py-3 rounded-2xl border border-navy-lighter text-muted hover:text-soft-white hover:border-amber/30 transition-colors"
+            className="block w-full text-center px-8 py-3 rounded-2xl glass-btn text-amber hover:text-amber-light"
           >
             Lancer le rituel du soir
           </Link>

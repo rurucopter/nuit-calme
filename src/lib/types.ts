@@ -49,6 +49,34 @@ export interface DailyCheckIn {
   date: string;
   sleepQuality: 1 | 2 | 3 | 4 | 5;
   followedRitual: boolean;
+  sleepLatency?: 'fast' | 'normal' | 'long' | 'very-long';
+  potentialCause?: string;
+  habits?: Record<string, boolean>;
+}
+
+export interface Habit {
+  id: string;
+  label: string;
+  emoji: string;
+  cause: CauseType;
+}
+
+export type NightlightTheme = 'braise' | 'aurore' | 'ocean' | 'lavande' | 'foret';
+
+export type BreathingExercise = 'breathing-478' | 'coherence' | 'box' | 'relaxation';
+
+export interface RitualPreferences {
+  theme: NightlightTheme;
+  defaultSound: AmbientSound;
+  defaultExercise: BreathingExercise;
+  durationMinutes: number;
+}
+
+export interface PatternInsight {
+  type: 'warning' | 'positive' | 'suggestion';
+  title: string;
+  description: string;
+  emoji: string;
 }
 
 export interface UserData {
@@ -60,6 +88,8 @@ export interface UserData {
   checkIns: DailyCheckIn[];
   currentWeek: number;
   planStartDate: string | null;
+  ritualPreferences: RitualPreferences | null;
+  habitCompletions: Record<string, Record<string, boolean>>;
 }
 
 export interface Question {

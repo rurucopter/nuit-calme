@@ -11,6 +11,8 @@ const defaultData: UserData = {
   checkIns: [],
   currentWeek: 1,
   planStartDate: null,
+  ritualPreferences: null,
+  habitCompletions: {},
 };
 
 export function getUserData(): UserData {

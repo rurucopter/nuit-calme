@@ -85,11 +85,11 @@ export default function DiagnosticPage() {
           >
             ← Retour
           </button>
-          <span className="text-xs text-muted">
+          <span className="text-xs glass-light px-3 py-1 rounded-full text-muted">
             {currentQ + 1} / {totalQuestions}
           </span>
         </div>
-        <div className="h-1 bg-navy-lighter rounded-full overflow-hidden">
+        <div className="h-1.5 glass rounded-full overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-amber to-orange rounded-full transition-all duration-500 ease-out"
             style={{ width: `${progress}%` }}
@@ -116,10 +116,10 @@ export default function DiagnosticPage() {
             <button
               key={opt.value}
               onClick={() => handleAnswer(opt.value)}
-              className={`w-full text-left px-5 py-4 rounded-2xl border transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] ${
+              className={`w-full text-left px-5 py-4 rounded-2xl transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] ${
                 answers[question.id] === opt.value
-                  ? "border-amber bg-amber/10 text-amber"
-                  : "border-navy-lighter bg-navy-light/30 hover:border-navy-lighter hover:bg-navy-light/60 text-soft-white"
+                  ? "glass-accent text-amber"
+                  : "glass-light hover:bg-white/[0.06] text-soft-white"
               }`}
             >
               <span className="flex items-center gap-3">

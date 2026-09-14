@@ -10,7 +10,7 @@ function Stars() {
   >([]);
   useEffect(() => {
     setStars(
-      Array.from({ length: 40 }, () => ({
+      Array.from({ length: 50 }, () => ({
         x: Math.random() * 100,
         y: Math.random() * 100,
         size: Math.random() * 2 + 1,
@@ -63,14 +63,14 @@ export default function LandingPage() {
         {hasData ? (
           <Link
             href="/dashboard"
-            className="text-sm text-amber hover:text-amber-light transition-colors"
+            className="text-sm glass-btn px-4 py-2 rounded-full text-amber font-medium"
           >
             Mon espace
           </Link>
         ) : (
           <Link
             href="/diagnostic"
-            className="text-sm px-4 py-2 rounded-full bg-amber/10 text-amber hover:bg-amber/20 transition-colors"
+            className="text-sm glass-btn px-4 py-2 rounded-full text-amber font-medium"
           >
             Commencer
           </Link>
@@ -79,7 +79,7 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section className="relative z-10 px-6 pt-16 pb-24 max-w-4xl mx-auto text-center">
-        <div className="inline-block px-4 py-1.5 rounded-full bg-amber/10 text-amber text-sm font-medium mb-8 animate-fade-in">
+        <div className="inline-block px-4 py-1.5 rounded-full glass-btn text-amber text-sm font-medium mb-8 animate-fade-in">
           Diagnostic gratuit en 2 minutes
         </div>
 
@@ -99,7 +99,7 @@ export default function LandingPage() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in delay-300 opacity-0">
           <Link
             href="/diagnostic"
-            className="px-8 py-4 rounded-2xl bg-gradient-to-r from-amber to-orange text-midnight font-semibold text-lg hover:shadow-lg hover:shadow-amber/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="px-8 py-4 rounded-2xl glass-btn-solid text-midnight font-semibold text-lg hover:scale-[1.02] active:scale-[0.98]"
           >
             Faire mon diagnostic gratuit
           </Link>
@@ -122,7 +122,7 @@ export default function LandingPage() {
       </section>
 
       {/* Problem section */}
-      <section className="relative z-10 px-6 py-20 bg-navy/50">
+      <section className="relative z-10 px-6 py-20">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
             Le probleme, c&apos;est pas que tu dors mal.
@@ -151,7 +151,7 @@ export default function LandingPage() {
             ].map((item) => (
               <div
                 key={item.title}
-                className="p-6 rounded-2xl bg-navy-light/50 border border-navy-lighter/50"
+                className="p-6 rounded-2xl glass hover:border-amber/15 transition-all duration-300"
               >
                 <div className="text-3xl mb-4">{item.icon}</div>
                 <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
@@ -195,7 +195,7 @@ export default function LandingPage() {
                 time: "10-20 min",
               },
             ].map((item) => (
-              <div key={item.step} className="relative">
+              <div key={item.step} className="relative glass-light p-6 rounded-2xl">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber to-orange flex items-center justify-center text-midnight font-bold mb-4">
                   {item.step}
                 </div>
@@ -213,7 +213,7 @@ export default function LandingPage() {
       </section>
 
       {/* Ritual preview */}
-      <section className="relative z-10 px-6 py-20 bg-navy/50">
+      <section className="relative z-10 px-6 py-20">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">
             Le rituel du soir
@@ -224,7 +224,7 @@ export default function LandingPage() {
           </p>
 
           {/* Ritual mockup */}
-          <div className="max-w-sm mx-auto rounded-3xl overflow-hidden border border-navy-lighter/50 bg-gradient-to-b from-orange-deep/20 via-amber/10 to-navy-light/80 p-8 aspect-[9/16] flex flex-col items-center justify-center">
+          <div className="max-w-sm mx-auto rounded-3xl overflow-hidden glass-strong p-8 aspect-[9/16] flex flex-col items-center justify-center">
             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-light to-orange animate-breathe mb-8" />
             <p className="text-amber-light text-xl font-medium mb-2">22:30</p>
             <p className="text-muted text-sm mb-8">Ton rituel commence</p>
@@ -232,7 +232,7 @@ export default function LandingPage() {
               {["Pluie", "Ocean", "Foret"].map((s) => (
                 <span
                   key={s}
-                  className="px-3 py-1.5 rounded-full bg-navy-lighter/60 text-xs text-muted"
+                  className="px-3 py-1.5 rounded-full glass-light text-xs text-muted"
                 >
                   {s}
                 </span>
@@ -244,7 +244,7 @@ export default function LandingPage() {
 
       {/* CTA */}
       <section className="relative z-10 px-6 py-24">
-        <div className="max-w-2xl mx-auto text-center">
+        <div className="max-w-2xl mx-auto text-center glass rounded-3xl p-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
             Pret a mieux dormir ?
           </h2>
@@ -254,7 +254,7 @@ export default function LandingPage() {
           </p>
           <Link
             href="/diagnostic"
-            className="inline-block px-8 py-4 rounded-2xl bg-gradient-to-r from-amber to-orange text-midnight font-semibold text-lg hover:shadow-lg hover:shadow-amber/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="inline-block px-8 py-4 rounded-2xl glass-btn-solid text-midnight font-semibold text-lg hover:scale-[1.02] active:scale-[0.98]"
           >
             Lancer mon diagnostic
           </Link>
@@ -262,7 +262,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 px-6 py-8 border-t border-navy-lighter/30">
+      <footer className="relative z-10 px-6 py-8 border-t border-white/5">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-muted text-sm">
             <div className="w-5 h-5 rounded-full bg-gradient-to-br from-amber to-orange" />

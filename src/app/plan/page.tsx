@@ -4,12 +4,14 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getUserData, getCurrentWeek } from "@/lib/storage";
-import { Plan } from "@/lib/types";
+import { Plan, CauseType } from "@/lib/types";
+import { getHabitsForCause } from "@/lib/habits";
 
 export default function PlanPage() {
   const router = useRouter();
   const [plan, setPlan] = useState<Plan | null>(null);
   const [activeWeek, setActiveWeek] = useState(1);
+  const [cause, setCause] = useState<CauseType | null>(null);
 
   useEffect(() => {
     const data = getUserData();
@@ -19,6 +21,7 @@ export default function PlanPage() {
     }
     setPlan(data.plan);
     setActiveWeek(getCurrentWeek());
+    if (data.verdict) setCause(data.verdict.primaryCause);
   }, [router]);
 
   if (!plan) {
@@ -30,6 +33,7 @@ export default function PlanPage() {
   }
 
   const currentWeek = getCurrentWeek();
+  const habits = cause ? getHabitsForCause(cause) : [];
 
   return (
     <div className="min-h-dvh flex flex-col px-6 py-8 max-w-lg mx-auto">
@@ -41,7 +45,7 @@ export default function PlanPage() {
         >
           ← Retour
         </button>
-        <Link href="/dashboard" className="text-sm text-amber">
+        <Link href="/dashboard" className="text-sm glass-btn px-3 py-1.5 rounded-full text-amber">
           Dashboard
         </Link>
       </div>
@@ -63,10 +67,10 @@ export default function PlanPage() {
               onClick={() => setActiveWeek(week.number)}
               className={`flex-shrink-0 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                 isActive
-                  ? "bg-amber text-midnight"
+                  ? "glass-btn-solid text-midnight"
                   : isPast
-                  ? "bg-mint/10 text-mint border border-mint/20"
-                  : "bg-navy-light/50 text-muted border border-navy-lighter/50"
+                  ? "glass-light text-mint"
+                  : "glass-light text-muted"
               } ${isCurrent && !isActive ? "ring-1 ring-amber/30" : ""}`}
             >
               S{week.number}
@@ -85,7 +89,7 @@ export default function PlanPage() {
               <div className="flex items-center gap-3 mb-1">
                 <h2 className="text-xl font-bold">{week.title}</h2>
                 {week.number === currentWeek && (
-                  <span className="px-2 py-0.5 rounded-full bg-amber/10 text-amber text-xs">
+                  <span className="px-2 py-0.5 rounded-full glass-btn text-amber text-xs">
                     En cours
                   </span>
                 )}
@@ -98,9 +102,9 @@ export default function PlanPage() {
               {week.goals.map((goal, i) => (
                 <div
                   key={i}
-                  className="flex items-start gap-3 p-4 rounded-xl bg-navy-light/30 border border-navy-lighter/30"
+                  className="flex items-start gap-3 p-4 rounded-xl glass-light"
                 >
-                  <div className="w-6 h-6 rounded-full bg-amber/10 border border-amber/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <div className="w-6 h-6 rounded-full glass-accent flex items-center justify-center flex-shrink-0 mt-0.5">
                     <span className="text-amber text-xs">{i + 1}</span>
                   </div>
                   <p className="text-sm text-soft-white leading-relaxed">
@@ -110,8 +114,23 @@ export default function PlanPage() {
               ))}
             </div>
 
+            {/* Daily habits */}
+            {habits.length > 0 && (
+              <div className="mb-8">
+                <p className="text-xs text-muted mb-3 uppercase tracking-wider">Micro-habitudes quotidiennes</p>
+                <div className="glass rounded-2xl p-4 space-y-2">
+                  {habits.map((h) => (
+                    <div key={h.id} className="flex items-center gap-3 py-2">
+                      <span className="text-lg">{h.emoji}</span>
+                      <span className="text-sm text-soft-white">{h.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Tip */}
-            <div className="p-4 rounded-xl bg-lavender/5 border border-lavender/20 mb-8">
+            <div className="p-4 rounded-xl glass border-lavender/15 mb-8" style={{ borderColor: 'rgba(139,92,246,0.15)' }}>
               <p className="text-xs text-lavender font-medium mb-1">
                 💡 Conseil
               </p>
@@ -124,13 +143,13 @@ export default function PlanPage() {
       <div className="mt-auto pt-6 space-y-3">
         <Link
           href="/ritual"
-          className="block w-full text-center px-8 py-4 rounded-2xl bg-gradient-to-r from-amber to-orange text-midnight font-semibold hover:shadow-lg hover:shadow-amber/25 transition-all hover:scale-[1.01] active:scale-[0.99]"
+          className="block w-full text-center px-8 py-4 rounded-2xl glass-btn-solid text-midnight font-semibold hover:scale-[1.01] active:scale-[0.99]"
         >
           Lancer le rituel du soir
         </Link>
         <Link
           href="/checkin"
-          className="block w-full text-center px-6 py-3 rounded-2xl border border-navy-lighter text-muted hover:text-soft-white hover:border-amber/30 transition-colors text-sm"
+          className="block w-full text-center px-6 py-3 rounded-2xl glass-btn text-amber text-sm"
         >
           Check-in du matin
         </Link>

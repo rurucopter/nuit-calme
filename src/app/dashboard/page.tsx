@@ -5,12 +5,20 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getUserData, getStreak, getCurrentWeek } from "@/lib/storage";
 import { UserData, DailyCheckIn } from "@/lib/types";
+import {
+  detectPatterns,
+  getHabitCompletionRate,
+  getHabitsForCause,
+} from "@/lib/habits";
+import type { PatternInsight } from "@/lib/types";
 
 export default function DashboardPage() {
   const router = useRouter();
   const [data, setData] = useState<UserData | null>(null);
   const [streak, setStreak] = useState(0);
   const [currentWeek, setCurrentWeek] = useState(1);
+  const [insights, setInsights] = useState<PatternInsight[]>([]);
+  const [habitRate, setHabitRate] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -22,6 +30,8 @@ export default function DashboardPage() {
     setData(d);
     setStreak(getStreak());
     setCurrentWeek(getCurrentWeek());
+    setInsights(detectPatterns(d.checkIns));
+    setHabitRate(getHabitCompletionRate(d.habitCompletions));
   }, [router]);
 
   const drawChart = useCallback(() => {
@@ -47,7 +57,7 @@ export default function DashboardPage() {
 
     const last7 = getLast7Days(data.checkIns);
 
-    ctx.strokeStyle = "rgba(148,163,184,0.15)";
+    ctx.strokeStyle = "rgba(148,163,184,0.1)";
     ctx.lineWidth = 1;
     for (let i = 1; i <= 5; i++) {
       const y = padding.top + chartH - (i / 5) * chartH;
@@ -70,8 +80,13 @@ export default function DashboardPage() {
     ctx.fillText("1", padding.left - 6, h - padding.bottom + 4);
 
     if (last7.some((d) => d.quality > 0)) {
-      const gradient = ctx.createLinearGradient(0, padding.top, 0, h - padding.bottom);
-      gradient.addColorStop(0, "rgba(245,158,11,0.3)");
+      const gradient = ctx.createLinearGradient(
+        0,
+        padding.top,
+        0,
+        h - padding.bottom
+      );
+      gradient.addColorStop(0, "rgba(245,158,11,0.25)");
       gradient.addColorStop(1, "rgba(245,158,11,0)");
 
       const points = last7
@@ -89,12 +104,16 @@ export default function DashboardPage() {
         ctx.moveTo(points[0].x, h - padding.bottom);
         ctx.lineTo(points[0].x, points[0].y);
         for (let i = 1; i < points.length; i++) {
-          const cp1x = points[i - 1].x + (points[i].x - points[i - 1].x) / 3;
+          const cp1x =
+            points[i - 1].x + (points[i].x - points[i - 1].x) / 3;
           const cp2x = points[i].x - (points[i].x - points[i - 1].x) / 3;
           ctx.bezierCurveTo(
-            cp1x, points[i - 1].y,
-            cp2x, points[i].y,
-            points[i].x, points[i].y
+            cp1x,
+            points[i - 1].y,
+            cp2x,
+            points[i].y,
+            points[i].x,
+            points[i].y
           );
         }
         ctx.lineTo(points[points.length - 1].x, h - padding.bottom);
@@ -105,12 +124,16 @@ export default function DashboardPage() {
         ctx.beginPath();
         ctx.moveTo(points[0].x, points[0].y);
         for (let i = 1; i < points.length; i++) {
-          const cp1x = points[i - 1].x + (points[i].x - points[i - 1].x) / 3;
+          const cp1x =
+            points[i - 1].x + (points[i].x - points[i - 1].x) / 3;
           const cp2x = points[i].x - (points[i].x - points[i - 1].x) / 3;
           ctx.bezierCurveTo(
-            cp1x, points[i - 1].y,
-            cp2x, points[i].y,
-            points[i].x, points[i].y
+            cp1x,
+            points[i - 1].y,
+            cp2x,
+            points[i].y,
+            points[i].x,
+            points[i].y
           );
         }
         ctx.strokeStyle = "#f59e0b";
@@ -143,6 +166,11 @@ export default function DashboardPage() {
 
   const ritualRate = getRitualRate(data.checkIns);
   const avgQuality = getAvgQuality(data.checkIns);
+  const habits = data.verdict
+    ? getHabitsForCause(data.verdict.primaryCause)
+    : [];
+  const todayStr = new Date().toISOString().split("T")[0];
+  const todayHabits = data.habitCompletions[todayStr] ?? {};
 
   return (
     <div className="min-h-dvh flex flex-col px-6 py-8 max-w-lg mx-auto">
@@ -152,22 +180,25 @@ export default function DashboardPage() {
           <h1 className="text-xl font-bold">Nuit Calme</h1>
           <p className="text-muted text-xs">Semaine {currentWeek} / 4</p>
         </div>
-        <Link href="/" className="text-muted text-sm hover:text-soft-white transition-colors">
+        <Link
+          href="/"
+          className="text-muted text-sm glass-btn px-3 py-1.5 rounded-full hover:text-soft-white transition-colors"
+        >
           Accueil
         </Link>
       </div>
 
       {/* Stats grid */}
-      <div className="grid grid-cols-3 gap-3 mb-8">
-        <div className="p-4 rounded-2xl bg-navy-light/50 border border-navy-lighter/30 text-center">
+      <div className="grid grid-cols-3 gap-3 mb-6">
+        <div className="p-4 rounded-2xl glass text-center">
           <p className="text-2xl font-bold text-amber">{streak}</p>
           <p className="text-xs text-muted mt-1">jours de suite</p>
         </div>
-        <div className="p-4 rounded-2xl bg-navy-light/50 border border-navy-lighter/30 text-center">
+        <div className="p-4 rounded-2xl glass text-center">
           <p className="text-2xl font-bold text-mint">{ritualRate}%</p>
           <p className="text-xs text-muted mt-1">rituels suivis</p>
         </div>
-        <div className="p-4 rounded-2xl bg-navy-light/50 border border-navy-lighter/30 text-center">
+        <div className="p-4 rounded-2xl glass text-center">
           <p className="text-2xl font-bold text-lavender">
             {avgQuality > 0 ? avgQuality.toFixed(1) : "-"}
           </p>
@@ -175,8 +206,44 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Insights */}
+      {insights.length > 0 && (
+        <div className="space-y-2 mb-6">
+          {insights.map((insight, i) => (
+            <div
+              key={i}
+              className={`p-4 rounded-2xl glass ${
+                insight.type === "warning"
+                  ? "border-rose/20"
+                  : insight.type === "positive"
+                  ? "border-mint/20"
+                  : "border-amber/15"
+              }`}
+              style={{
+                borderColor:
+                  insight.type === "warning"
+                    ? "rgba(244,63,94,0.2)"
+                    : insight.type === "positive"
+                    ? "rgba(16,185,129,0.2)"
+                    : "rgba(245,158,11,0.15)",
+              }}
+            >
+              <div className="flex items-start gap-3">
+                <span className="text-lg">{insight.emoji}</span>
+                <div>
+                  <p className="text-sm font-medium mb-0.5">{insight.title}</p>
+                  <p className="text-xs text-muted leading-relaxed">
+                    {insight.description}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Chart */}
-      <div className="p-4 rounded-2xl bg-navy-light/50 border border-navy-lighter/30 mb-8">
+      <div className="p-4 rounded-2xl glass mb-6">
         <p className="text-xs text-muted mb-3">
           Qualite du sommeil — 7 derniers jours
         </p>
@@ -192,15 +259,59 @@ export default function DashboardPage() {
         )}
       </div>
 
+      {/* Habit completion */}
+      {habits.length > 0 && (
+        <div className="glass rounded-2xl p-4 mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs text-muted uppercase tracking-wider">
+              Habitudes du jour
+            </p>
+            {habitRate > 0 && (
+              <span className="text-xs glass-btn px-2 py-0.5 rounded-full text-amber">
+                {habitRate}% cette semaine
+              </span>
+            )}
+          </div>
+          <div className="space-y-2">
+            {habits.map((h) => (
+              <div
+                key={h.id}
+                className="flex items-center gap-3 py-1.5"
+              >
+                <span
+                  className={`w-4 h-4 rounded-full border flex items-center justify-center text-[8px] ${
+                    todayHabits[h.id]
+                      ? "bg-amber border-amber text-midnight"
+                      : "border-muted-dark"
+                  }`}
+                >
+                  {todayHabits[h.id] && "✓"}
+                </span>
+                <span className="text-sm">{h.emoji}</span>
+                <span
+                  className={`text-sm ${
+                    todayHabits[h.id] ? "text-muted line-through" : ""
+                  }`}
+                >
+                  {h.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Plan progress */}
       {data.plan && (
         <Link
           href="/plan"
-          className="block p-4 rounded-2xl bg-navy-light/50 border border-navy-lighter/30 mb-8 hover:border-amber/20 transition-colors"
+          className="block p-4 rounded-2xl glass mb-6 hover:border-amber/20 transition-colors"
         >
           <div className="flex items-center justify-between mb-2">
             <p className="text-sm font-medium">{data.plan.title}</p>
-            <span className="text-xs text-amber">S{currentWeek}/4 →</span>
+            <span className="text-xs glass-btn px-2 py-0.5 rounded-full text-amber">
+              S{currentWeek}/4 →
+            </span>
           </div>
           <div className="flex gap-1">
             {[1, 2, 3, 4].map((w) => (
@@ -211,7 +322,7 @@ export default function DashboardPage() {
                     ? "bg-mint"
                     : w === currentWeek
                     ? "bg-amber"
-                    : "bg-navy-lighter"
+                    : "bg-navy-lighter/50"
                 }`}
               />
             ))}
@@ -223,7 +334,7 @@ export default function DashboardPage() {
       {data.verdict && (
         <Link
           href="/verdict"
-          className="block p-4 rounded-2xl bg-amber/5 border border-amber/10 mb-8 hover:border-amber/20 transition-colors"
+          className="block p-4 rounded-2xl glass-accent mb-6 hover:border-amber/25 transition-colors"
         >
           <p className="text-xs text-amber/60 mb-1">Ton diagnostic</p>
           <p className="text-sm font-medium">{data.verdict.title}</p>
@@ -234,13 +345,13 @@ export default function DashboardPage() {
       <div className="mt-auto space-y-3 pt-6">
         <Link
           href="/ritual"
-          className="block w-full text-center px-8 py-4 rounded-2xl bg-gradient-to-r from-amber to-orange text-midnight font-semibold hover:shadow-lg hover:shadow-amber/25 transition-all hover:scale-[1.01] active:scale-[0.99]"
+          className="block w-full text-center px-8 py-4 rounded-2xl glass-btn-solid text-midnight font-semibold hover:scale-[1.01] active:scale-[0.99]"
         >
           Lancer le rituel du soir
         </Link>
         <Link
           href="/checkin"
-          className="block w-full text-center px-6 py-3 rounded-2xl border border-navy-lighter text-muted hover:text-soft-white hover:border-amber/30 transition-colors text-sm"
+          className="block w-full text-center px-6 py-3 rounded-2xl glass-btn text-amber text-sm"
         >
           Check-in du matin
         </Link>
