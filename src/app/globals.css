@@ -1,21 +1,21 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-midnight: #0a0e27;
-  --color-navy: #12183b;
-  --color-navy-light: #1e2654;
-  --color-navy-lighter: #2a3368;
-  --color-amber: #f59e0b;
-  --color-amber-light: #fbbf24;
-  --color-amber-glow: #f59e0b33;
-  --color-orange: #f97316;
-  --color-orange-deep: #ea580c;
-  --color-lavender: #8b5cf6;
+  --color-midnight: #0c0a20;
+  --color-navy: #161240;
+  --color-navy-light: #221b56;
+  --color-navy-lighter: #332a6e;
+  --color-amber: #f5a623;
+  --color-amber-light: #ffc857;
+  --color-amber-glow: #f5a62333;
+  --color-orange: #f0725c;
+  --color-orange-deep: #e05a45;
+  --color-lavender: #9b7aeb;
   --color-mint: #10b981;
   --color-rose: #f43f5e;
-  --color-soft-white: #f0f0f5;
-  --color-muted: #94a3b8;
-  --color-muted-dark: #64748b;
+  --color-soft-white: #e8e6f0;
+  --color-muted: #8b8faa;
+  --color-muted-dark: #5c5f7a;
 
   --font-sans: var(--font-dm-sans);
 }
@@ -26,7 +26,8 @@
 }
 
 body {
-  background: var(--color-midnight);
+  background: linear-gradient(180deg, var(--color-midnight) 0%, #110e30 50%, #0e0b25 100%);
+  background-attachment: fixed;
   color: var(--color-soft-white);
 }
 
@@ -97,53 +98,53 @@ body {
 }
 
 .glass {
-  background: rgba(18, 24, 59, 0.4);
+  background: rgba(22, 18, 64, 0.45);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(155, 122, 235, 0.08);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .glass-light {
-  background: rgba(30, 38, 84, 0.35);
+  background: rgba(34, 27, 86, 0.38);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(155, 122, 235, 0.06);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .glass-accent {
-  background: rgba(245, 158, 11, 0.08);
+  background: rgba(245, 166, 35, 0.08);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(245, 158, 11, 0.15);
-  box-shadow: 0 8px 32px rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 166, 35, 0.15);
+  box-shadow: 0 8px 32px rgba(245, 166, 35, 0.1);
 }
 
 .glass-strong {
-  background: rgba(18, 24, 59, 0.6);
+  background: rgba(22, 18, 64, 0.65);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(155, 122, 235, 0.12);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
 }
 
 .glass-btn {
-  background: rgba(245, 158, 11, 0.15);
+  background: rgba(245, 166, 35, 0.15);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(245, 158, 11, 0.25);
+  border: 1px solid rgba(245, 166, 35, 0.25);
   transition: all 0.3s ease;
 }
 
 .glass-btn:hover {
-  background: rgba(245, 158, 11, 0.25);
-  border-color: rgba(245, 158, 11, 0.4);
-  box-shadow: 0 0 20px rgba(245, 158, 11, 0.15);
+  background: rgba(245, 166, 35, 0.25);
+  border-color: rgba(245, 166, 35, 0.4);
+  box-shadow: 0 0 20px rgba(245, 166, 35, 0.15);
 }
 
 .glass-btn-solid {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.9), rgba(249, 115, 22, 0.9));
+  background: linear-gradient(135deg, rgba(240, 114, 92, 0.95), rgba(245, 166, 35, 0.9));
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -151,21 +152,21 @@ body {
 }
 
 .glass-btn-solid:hover {
-  background: linear-gradient(135deg, rgba(251, 191, 36, 0.95), rgba(245, 158, 11, 0.95));
-  box-shadow: 0 0 30px rgba(245, 158, 11, 0.3);
+  background: linear-gradient(135deg, rgba(248, 135, 110, 0.95), rgba(255, 200, 87, 0.95));
+  box-shadow: 0 0 30px rgba(240, 114, 92, 0.3);
 }
 
 .glass-input {
-  background: rgba(18, 24, 59, 0.5);
+  background: rgba(22, 18, 64, 0.55);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(155, 122, 235, 0.1);
   transition: all 0.3s ease;
 }
 
 .glass-input:focus {
-  border-color: rgba(245, 158, 11, 0.4);
-  box-shadow: 0 0 16px rgba(245, 158, 11, 0.1);
+  border-color: rgba(240, 114, 92, 0.4);
+  box-shadow: 0 0 16px rgba(240, 114, 92, 0.1);
 }
 
 @keyframes shimmer {

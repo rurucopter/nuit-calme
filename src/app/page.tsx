@@ -140,8 +140,8 @@ function LiveNightSky() {
           width: 60,
           height: 60,
           borderRadius: "50%",
-          background: "radial-gradient(circle at 35% 35%, #fde68a, #f59e0b, #ea580c)",
-          boxShadow: "0 0 40px rgba(245,158,11,0.3), 0 0 80px rgba(245,158,11,0.1)",
+          background: "radial-gradient(circle at 35% 35%, #fde68a, #f5a623, #f0725c)",
+          boxShadow: "0 0 40px rgba(245,166,35,0.3), 0 0 80px rgba(245,166,35,0.1)",
         }}
       />
     </div>

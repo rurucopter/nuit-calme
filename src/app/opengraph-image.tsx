@@ -16,7 +16,7 @@ export default function OGImage() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background: "linear-gradient(135deg, #0a0e27, #12183b, #1e2654)",
+          background: "linear-gradient(135deg, #0c0a20, #161240, #221b56)",
           fontFamily: "sans-serif",
         }}
       >
@@ -30,7 +30,7 @@ export default function OGImage() {
             height: 100,
             borderRadius: "50%",
             background:
-              "radial-gradient(circle at 35% 35%, #fde68a, #f59e0b, #ea580c)",
+              "radial-gradient(circle at 35% 35%, #fde68a, #f5a623, #f0725c)",
             boxShadow:
               "0 0 60px rgba(245,158,11,0.4), 0 0 120px rgba(245,158,11,0.15)",
             display: "flex",
@@ -68,11 +68,11 @@ export default function OGImage() {
             width: 64,
             height: 64,
             borderRadius: "50%",
-            background: "linear-gradient(135deg, #f59e0b, #f97316)",
+            background: "linear-gradient(135deg, #f0725c, #f5a623)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            color: "#0a0e27",
+            color: "#0c0a20",
             fontWeight: 700,
             fontSize: 28,
             marginBottom: 24,
@@ -85,7 +85,7 @@ export default function OGImage() {
           style={{
             fontSize: 56,
             fontWeight: 700,
-            color: "#f0f0f5",
+            color: "#e8e6f0",
             textAlign: "center",
             lineHeight: 1.2,
             display: "flex",
@@ -96,7 +96,7 @@ export default function OGImage() {
           <span>Tu dors mal.</span>
           <span
             style={{
-              background: "linear-gradient(90deg, #f59e0b, #f97316, #ea580c)",
+              background: "linear-gradient(90deg, #f5a623, #f0725c, #e05a45)",
               backgroundClip: "text",
               color: "transparent",
             }}
@@ -108,7 +108,7 @@ export default function OGImage() {
         <div
           style={{
             fontSize: 22,
-            color: "#94a3b8",
+            color: "#8b8faa",
             marginTop: 20,
             textAlign: "center",
             display: "flex",
@@ -122,8 +122,8 @@ export default function OGImage() {
             marginTop: 32,
             padding: "14px 40px",
             borderRadius: 20,
-            background: "linear-gradient(135deg, #f59e0b, #f97316)",
-            color: "#0a0e27",
+            background: "linear-gradient(135deg, #f0725c, #f5a623)",
+            color: "#0c0a20",
             fontWeight: 600,
             fontSize: 20,
             display: "flex",

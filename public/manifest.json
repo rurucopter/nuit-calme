@@ -4,8 +4,8 @@
   "description": "Repare ton sommeil avec un diagnostic personnalise et un rituel du soir guide.",
   "start_url": "/dashboard",
   "display": "standalone",
-  "background_color": "#0a0e27",
-  "theme_color": "#0a0e27",
+  "background_color": "#0c0a20",
+  "theme_color": "#0c0a20",
   "orientation": "portrait",
   "icons": [
     {
