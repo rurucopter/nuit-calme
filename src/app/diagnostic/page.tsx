@@ -317,6 +317,9 @@ export default function DiagnosticPage() {
         if (next >= totalQuestions) {
           const fullAnswers = updated as DiagnosticAnswers;
           if (!fullAnswers.exerciseTime) fullAnswers.exerciseTime = "morning";
+          if (!fullAnswers.roomLight) fullAnswers.roomLight = "dim";
+          if (!fullAnswers.roomTemp) fullAnswers.roomTemp = "comfortable";
+          if (!fullAnswers.eveningMeal) fullAnswers.eveningMeal = "light";
           const v = analyzeDiagnostic(fullAnswers);
           const plan = generatePlan(v.primaryCause);
 

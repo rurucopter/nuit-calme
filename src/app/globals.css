@@ -249,3 +249,25 @@ body {
 .animate-progress-fill {
   animation: progress-fill 2s ease-out forwards;
 }
+
+@keyframes shooting-star {
+  0% { opacity: 0; transform: translateX(0) rotate(inherit); }
+  5% { opacity: 1; }
+  20% { opacity: 1; transform: translateX(120px) rotate(inherit); }
+  30% { opacity: 0; transform: translateX(180px) rotate(inherit); }
+  100% { opacity: 0; }
+}
+
+.animate-shooting-star {
+  opacity: 0;
+  animation: shooting-star 1.2s ease-out infinite;
+}
+
+@keyframes drift-cloud {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(120vw); }
+}
+
+.animate-drift-cloud {
+  animation: drift-cloud linear infinite;
+}

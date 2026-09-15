@@ -32,9 +32,9 @@ export default function OffrePage() {
 
   const handlePurchase = () => {
     setLoading(true);
-    // Stripe integration placeholder
+    // Stripe integration placeholder — redirect to PWA install + onboarding
     setTimeout(() => {
-      router.push("/dashboard");
+      router.push("/installation");
     }, 1500);
   };
 

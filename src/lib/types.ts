@@ -18,6 +18,9 @@ export interface DiagnosticAnswers {
   eveningMind: string;
   nightWakeups: string;
   morningFeeling: string;
+  roomLight: string;
+  roomTemp: string;
+  eveningMeal: string;
 }
 
 export interface Verdict {

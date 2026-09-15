@@ -27,26 +27,52 @@ function useReveal() {
   return ref;
 }
 
-function Stars() {
+function LiveNightSky() {
   const [stars, setStars] = useState<
     { x: number; y: number; size: number; delay: number; dur: number }[]
   >([]);
+  const [shootingStars, setShootingStars] = useState<
+    { x: number; y: number; delay: number; angle: number }[]
+  >([]);
+  const [clouds, setClouds] = useState<
+    { x: number; y: number; w: number; opacity: number; speed: number }[]
+  >([]);
+
   useEffect(() => {
     setStars(
-      Array.from({ length: 50 }, () => ({
+      Array.from({ length: 80 }, () => ({
         x: Math.random() * 100,
-        y: Math.random() * 100,
-        size: Math.random() * 2 + 0.5,
-        delay: Math.random() * 4,
-        dur: 2 + Math.random() * 3,
+        y: Math.random() * 60,
+        size: Math.random() * 2.5 + 0.3,
+        delay: Math.random() * 6,
+        dur: 1.5 + Math.random() * 4,
+      }))
+    );
+    setShootingStars(
+      Array.from({ length: 3 }, () => ({
+        x: 10 + Math.random() * 80,
+        y: 5 + Math.random() * 30,
+        delay: 2 + Math.random() * 12,
+        angle: 25 + Math.random() * 20,
+      }))
+    );
+    setClouds(
+      Array.from({ length: 4 }, (_, i) => ({
+        x: -20 + i * 30,
+        y: 15 + Math.random() * 40,
+        w: 200 + Math.random() * 150,
+        opacity: 0.03 + Math.random() * 0.04,
+        speed: 60 + Math.random() * 40,
       }))
     );
   }, []);
+
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {/* Stars */}
       {stars.map((s, i) => (
         <div
-          key={i}
+          key={`s${i}`}
           className="absolute rounded-full bg-white animate-pulse-soft"
           style={{
             left: `${s.x}%`,
@@ -55,10 +81,69 @@ function Stars() {
             height: s.size,
             animationDelay: `${s.delay}s`,
             animationDuration: `${s.dur}s`,
-            opacity: 0.3,
+            opacity: 0.4,
           }}
         />
       ))}
+      {/* Shooting stars */}
+      {shootingStars.map((ss, i) => (
+        <div
+          key={`ss${i}`}
+          className="absolute animate-shooting-star"
+          style={{
+            left: `${ss.x}%`,
+            top: `${ss.y}%`,
+            width: 60,
+            height: 1.5,
+            background: "linear-gradient(to right, transparent, white 40%, rgba(255,255,255,0.8))",
+            borderRadius: 1,
+            transform: `rotate(${ss.angle}deg)`,
+            animationDelay: `${ss.delay}s`,
+            animationDuration: "1.2s",
+          }}
+        />
+      ))}
+      {/* Drifting clouds */}
+      {clouds.map((c, i) => (
+        <div
+          key={`c${i}`}
+          className="absolute rounded-full animate-drift-cloud"
+          style={{
+            left: `${c.x}%`,
+            top: `${c.y}%`,
+            width: c.w,
+            height: c.w * 0.3,
+            background: `radial-gradient(ellipse, rgba(148,163,184,${c.opacity}), transparent 70%)`,
+            animationDuration: `${c.speed}s`,
+            filter: "blur(20px)",
+          }}
+        />
+      ))}
+      {/* Moon glow */}
+      <div
+        className="absolute animate-breathe"
+        style={{
+          right: "12%",
+          top: "8%",
+          width: 120,
+          height: 120,
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(251,191,36,0.15), transparent 70%)",
+          filter: "blur(10px)",
+        }}
+      />
+      <div
+        className="absolute"
+        style={{
+          right: "14%",
+          top: "10%",
+          width: 60,
+          height: 60,
+          borderRadius: "50%",
+          background: "radial-gradient(circle at 35% 35%, #fde68a, #f59e0b, #ea580c)",
+          boxShadow: "0 0 40px rgba(245,158,11,0.3), 0 0 80px rgba(245,158,11,0.1)",
+        }}
+      />
     </div>
   );
 }
@@ -213,7 +298,7 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-midnight/50 via-midnight/60 to-midnight" />
       </div>
 
-      <Stars />
+      <LiveNightSky />
 
       {/* Nav */}
       <nav

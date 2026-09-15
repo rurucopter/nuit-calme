@@ -113,6 +113,39 @@ export const questions: Question[] = [
       { value: 'zombie', label: 'Comme un zombie', emoji: '🧟' },
     ],
   },
+  {
+    id: 'roomLight',
+    question: 'Ta chambre la nuit, c\'est...',
+    subtitle: 'La lumiere est le signal n°1 pour ton horloge biologique.',
+    options: [
+      { value: 'dark', label: 'Noir total', emoji: '🌑' },
+      { value: 'dim', label: 'Un peu de lumiere (veilleuse, volets)', emoji: '🌘' },
+      { value: 'bright', label: 'Lumiere des lampadaires / enseignes', emoji: '🏙️' },
+      { value: 'screen-glow', label: 'LED de veille, TV, telephone', emoji: '💡' },
+    ],
+  },
+  {
+    id: 'roomTemp',
+    question: 'Tu as chaud ou froid la nuit ?',
+    subtitle: 'La temperature ideale pour dormir est entre 16 et 19°C.',
+    options: [
+      { value: 'cold', label: 'Souvent froid(e)', emoji: '🥶' },
+      { value: 'comfortable', label: 'Temperature confortable', emoji: '😌' },
+      { value: 'warm', label: 'Souvent chaud(e)', emoji: '🥵' },
+      { value: 'variable', label: 'Ca depend des nuits', emoji: '🤷' },
+    ],
+  },
+  {
+    id: 'eveningMeal',
+    question: 'Ton repas du soir, c\'est plutot...',
+    subtitle: 'La digestion influence directement la qualite du sommeil.',
+    options: [
+      { value: 'light', label: 'Leger, 2-3h avant de dormir', emoji: '🥗' },
+      { value: 'heavy', label: 'Copieux ou riche en graisses', emoji: '🍔' },
+      { value: 'late', label: 'Tard, juste avant le coucher', emoji: '🕐' },
+      { value: 'skip', label: 'Je ne mange pas / je grignote', emoji: '🚫' },
+    ],
+  },
 ];
 
 interface CauseScore {
@@ -148,6 +181,7 @@ function scoreScreenAddiction(a: DiagnosticAnswers): number {
   if (a.beforeBedActivity === 'social') score += 3;
   if (a.beforeBedActivity === 'video') score += 2;
   if (a.morningFeeling === 'exhausted' || a.morningFeeling === 'zombie') score += 1;
+  if (a.roomLight === 'screen-glow') score += 2;
   return score;
 }
 
@@ -171,6 +205,7 @@ function scoreStressRumination(a: DiagnosticAnswers): number {
   if (a.nightWakeups === 'often') score += 2;
   if (a.nightWakeups === 'every-night') score += 3;
   if (a.morningFeeling === 'exhausted' || a.morningFeeling === 'zombie') score += 1;
+  if (a.eveningMeal === 'skip') score += 1;
   return score;
 }
 
@@ -205,6 +240,9 @@ function scoreNoRoutine(a: DiagnosticAnswers): number {
   if (a.eveningMind === 'slightly-agitated') score += 1;
   if (a.morningFeeling === 'slightly-tired') score += 1;
   if (a.screenTime === '0-15' && a.eveningMind !== 'calm') score += 2;
+  if (a.roomLight === 'bright' || a.roomLight === 'screen-glow') score += 1;
+  if (a.roomTemp === 'warm' || a.roomTemp === 'variable') score += 1;
+  if (a.eveningMeal === 'heavy' || a.eveningMeal === 'late') score += 1;
   return score;
 }
 
@@ -275,7 +313,31 @@ function buildVerdict(
   };
 
   const v = verdicts[primaryCause];
-  return { ...v, primaryCause, secondaryCauses };
+
+  const envTips: string[] = [];
+  if (answers.roomLight === 'bright' || answers.roomLight === 'screen-glow') {
+    envTips.push('Ta chambre n\'est pas assez sombre — la moindre lumiere supprime ta melatonine (etude Harvard, 2011).');
+  }
+  if (answers.roomTemp === 'warm') {
+    envTips.push('Tu as trop chaud la nuit. La temperature ideale est 16-19°C — ton corps doit baisser de 1°C pour s\'endormir.');
+  }
+  if (answers.eveningMeal === 'heavy' || answers.eveningMeal === 'late') {
+    envTips.push('Ton repas du soir est trop lourd ou trop tardif. La digestion active maintient ton metabolisme eleve.');
+  }
+  if (answers.eveningMeal === 'skip') {
+    envTips.push('Ne pas manger le soir peut provoquer des reveils nocturnes par hypoglycemie.');
+  }
+
+  const envNote = envTips.length > 0
+    ? '\n\n' + envTips.join(' ')
+    : '';
+
+  return {
+    ...v,
+    description: v.description + envNote,
+    primaryCause,
+    secondaryCauses,
+  };
 }
 
 function screenTimeLabel(value: string): string {

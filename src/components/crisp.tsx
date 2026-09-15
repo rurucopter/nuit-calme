@@ -1,0 +1,24 @@
+"use client";
+
+import { useEffect } from "react";
+
+export function CrispWidget() {
+  useEffect(() => {
+    const crispId = process.env.NEXT_PUBLIC_CRISP_WEBSITE_ID;
+    if (!crispId) return;
+
+    (window as unknown as Record<string, unknown>).$crisp = [];
+    (window as unknown as Record<string, unknown>).CRISP_WEBSITE_ID = crispId;
+
+    const script = document.createElement("script");
+    script.src = "https://client.crisp.chat/l.js";
+    script.async = true;
+    document.head.appendChild(script);
+
+    return () => {
+      script.remove();
+    };
+  }, []);
+
+  return null;
+}
