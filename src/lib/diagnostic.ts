@@ -2,50 +2,20 @@ import { DiagnosticAnswers, CauseType, Verdict, Question } from './types';
 
 export const questions: Question[] = [
   {
-    id: 'bedtime',
-    question: 'A quelle heure tu te couches en general ?',
+    id: 'eveningMind',
+    question: 'Quand tu fermes les yeux le soir, ton cerveau fait quoi ?',
+    subtitle: 'Sois honnete avec toi-meme.',
     options: [
-      { value: 'before-22', label: 'Avant 22h', emoji: '🌅' },
-      { value: '22-23', label: '22h - 23h', emoji: '🌙' },
-      { value: '23-00', label: '23h - minuit', emoji: '🌑' },
-      { value: 'after-00', label: 'Apres minuit', emoji: '🦉' },
-    ],
-  },
-  {
-    id: 'wakeTime',
-    question: 'Et tu te reveilles a quelle heure ?',
-    options: [
-      { value: 'before-6', label: 'Avant 6h', emoji: '⏰' },
-      { value: '6-7', label: '6h - 7h', emoji: '🌤' },
-      { value: '7-8', label: '7h - 8h', emoji: '☀️' },
-      { value: 'after-8', label: 'Apres 8h', emoji: '😴' },
-    ],
-  },
-  {
-    id: 'caffeineCount',
-    question: 'Combien de cafes ou thes par jour ?',
-    options: [
-      { value: '0', label: 'Aucun', emoji: '🚫' },
-      { value: '1-2', label: '1 a 2', emoji: '☕' },
-      { value: '3-4', label: '3 a 4', emoji: '☕☕' },
-      { value: '5+', label: '5 ou plus', emoji: '🫠' },
-    ],
-  },
-  {
-    id: 'lastCaffeineTime',
-    question: 'Ton dernier cafe, c\'est vers quelle heure ?',
-    subtitle: 'La cafeine reste active 5 a 6 heures dans ton corps.',
-    options: [
-      { value: 'before-12', label: 'Avant midi', emoji: '✅' },
-      { value: '12-14', label: '12h - 14h', emoji: '🟡' },
-      { value: '14-17', label: '14h - 17h', emoji: '🟠' },
-      { value: 'after-17', label: 'Apres 17h', emoji: '🔴' },
+      { value: 'calm', label: 'Il se calme assez vite', emoji: '😌' },
+      { value: 'slightly-agitated', label: 'Il tourne un peu, mais ca va', emoji: '🤔' },
+      { value: 'very-agitated', label: 'Il n\'arrete pas — pensees en boucle', emoji: '🌀' },
+      { value: 'anxious', label: 'Anxiete, coeur qui bat, impossible de lacher', emoji: '😰' },
     ],
   },
   {
     id: 'screenTime',
-    question: 'Combien de temps sur ton telephone avant de dormir ?',
-    subtitle: 'Sois honnete, on ne juge pas.',
+    question: 'Combien de temps tu scrolles avant de dormir ?',
+    subtitle: 'TikTok, Insta, YouTube... Zero jugement.',
     options: [
       { value: '0-15', label: 'Moins de 15 min', emoji: '👍' },
       { value: '15-30', label: '15 - 30 min', emoji: '📱' },
@@ -54,96 +24,129 @@ export const questions: Question[] = [
     ],
   },
   {
-    id: 'beforeBedActivity',
-    question: 'Que fais-tu juste avant de dormir ?',
+    id: 'bedtime',
+    question: 'Tu finis par t\'endormir vers quelle heure ?',
+    subtitle: 'Pas l\'heure ou tu te couches. L\'heure ou tu dors vraiment.',
     options: [
-      { value: 'social', label: 'Scroll reseaux sociaux', emoji: '📱' },
-      { value: 'video', label: 'Series / videos', emoji: '📺' },
-      { value: 'reading', label: 'Lecture', emoji: '📖' },
-      { value: 'nothing', label: 'Rien de particulier', emoji: '🤷' },
-    ],
-  },
-  {
-    id: 'exerciseFrequency',
-    question: 'Tu fais du sport ?',
-    options: [
-      { value: 'never', label: 'Jamais', emoji: '🛋️' },
-      { value: '1-2', label: '1 a 2x / semaine', emoji: '🏃' },
-      { value: '3-4', label: '3 a 4x / semaine', emoji: '💪' },
-      { value: '5+', label: '5x ou plus', emoji: '🏋️' },
-    ],
-  },
-  {
-    id: 'exerciseTime',
-    question: 'A quel moment de la journee ?',
-    options: [
-      { value: 'morning', label: 'Le matin', emoji: '🌅' },
-      { value: 'noon', label: 'Le midi', emoji: '☀️' },
-      { value: 'afternoon', label: 'L\'apres-midi', emoji: '🌤' },
-      { value: 'evening', label: 'Le soir (apres 19h)', emoji: '🌙' },
-    ],
-  },
-  {
-    id: 'eveningMind',
-    question: 'Le soir, ton esprit est plutot...',
-    options: [
-      { value: 'calm', label: 'Calme', emoji: '😌' },
-      { value: 'slightly-agitated', label: 'Un peu agite', emoji: '🤔' },
-      { value: 'very-agitated', label: 'Tres agite', emoji: '🌀' },
-      { value: 'anxious', label: 'Anxieux', emoji: '😰' },
-    ],
-  },
-  {
-    id: 'nightWakeups',
-    question: 'Tu te reveilles la nuit ?',
-    options: [
-      { value: 'never', label: 'Jamais', emoji: '😴' },
-      { value: 'rarely', label: 'Rarement', emoji: '🌙' },
-      { value: 'often', label: 'Souvent', emoji: '👀' },
-      { value: 'every-night', label: 'Chaque nuit', emoji: '😩' },
+      { value: 'before-22', label: 'Avant 22h', emoji: '🌅' },
+      { value: '22-23', label: '22h - 23h', emoji: '🌙' },
+      { value: '23-00', label: '23h - minuit', emoji: '🌑' },
+      { value: 'after-00', label: 'Apres minuit', emoji: '🦉' },
     ],
   },
   {
     id: 'morningFeeling',
     question: 'Au reveil, tu te sens comment ?',
     options: [
-      { value: 'rested', label: 'Repose(e)', emoji: '😊' },
-      { value: 'slightly-tired', label: 'Un peu fatigue(e)', emoji: '😐' },
-      { value: 'exhausted', label: 'Epuise(e)', emoji: '😫' },
-      { value: 'zombie', label: 'Comme un zombie', emoji: '🧟' },
+      { value: 'rested', label: 'Frais, pret a attaquer', emoji: '😊' },
+      { value: 'slightly-tired', label: 'J\'ai besoin de cafe pour fonctionner', emoji: '😐' },
+      { value: 'exhausted', label: 'Epuise, comme si j\'avais pas dormi', emoji: '😫' },
+      { value: 'zombie', label: 'Mode zombie — 5 alarmes, 0 energie', emoji: '🧟' },
+    ],
+  },
+  {
+    id: 'nightWakeups',
+    question: 'Tu te reveilles en pleine nuit ?',
+    options: [
+      { value: 'never', label: 'Jamais', emoji: '😴' },
+      { value: 'rarely', label: 'De temps en temps', emoji: '🌙' },
+      { value: 'often', label: 'Plusieurs fois par semaine', emoji: '👀' },
+      { value: 'every-night', label: 'Quasiment chaque nuit', emoji: '😩' },
+    ],
+  },
+  {
+    id: 'caffeineCount',
+    question: 'Combien de cafes / energy drinks pour tenir ?',
+    options: [
+      { value: '0', label: 'Aucun', emoji: '🚫' },
+      { value: '1-2', label: '1 a 2', emoji: '☕' },
+      { value: '3-4', label: '3 a 4', emoji: '☕☕' },
+      { value: '5+', label: '5 ou plus', emoji: '🫠' },
+    ],
+  },
+];
+
+export const deepQuestions: Question[] = [
+  {
+    id: 'beforeBedActivity',
+    question: 'La derniere chose que tu fais avant de dormir ?',
+    options: [
+      { value: 'social', label: 'Scroll reseaux sociaux', emoji: '📱' },
+      { value: 'video', label: 'Series / YouTube / TikTok', emoji: '📺' },
+      { value: 'reading', label: 'Lecture', emoji: '📖' },
+      { value: 'nothing', label: 'Rien — je fixe le plafond', emoji: '🤷' },
+    ],
+  },
+  {
+    id: 'wakeTime',
+    question: 'Ton reveil sonne a quelle heure ?',
+    options: [
+      { value: 'before-6', label: 'Avant 6h', emoji: '⏰' },
+      { value: '6-7', label: '6h - 7h', emoji: '🌤' },
+      { value: '7-8', label: '7h - 8h', emoji: '☀️' },
+      { value: 'after-8', label: 'Apres 8h', emoji: '😴' },
+    ],
+  },
+  {
+    id: 'lastCaffeineTime',
+    question: 'Ton dernier cafe / energy drink, c\'est vers...',
+    subtitle: 'La cafeine reste active 5-6h. Un cafe a 16h agit encore a 22h.',
+    options: [
+      { value: 'before-12', label: 'Avant midi', emoji: '✅' },
+      { value: '12-14', label: '12h - 14h', emoji: '🟡' },
+      { value: '14-17', label: '14h - 17h', emoji: '🟠' },
+      { value: 'after-17', label: 'Apres 17h', emoji: '🔴' },
+    ],
+  },
+  {
+    id: 'exerciseFrequency',
+    question: 'Tu fais du sport ?',
+    options: [
+      { value: 'never', label: 'Non, pas vraiment', emoji: '🛋️' },
+      { value: '1-2', label: '1 a 2x / semaine', emoji: '🏃' },
+      { value: '3-4', label: '3 a 4x / semaine', emoji: '💪' },
+      { value: '5+', label: '5 fois ou plus', emoji: '🏋️' },
+    ],
+  },
+  {
+    id: 'exerciseTime',
+    question: 'A quel moment ?',
+    options: [
+      { value: 'morning', label: 'Le matin', emoji: '🌅' },
+      { value: 'noon', label: 'Le midi', emoji: '☀️' },
+      { value: 'afternoon', label: 'L\'apres-midi', emoji: '🌤' },
+      { value: 'evening', label: 'Le soir apres 19h', emoji: '🌙' },
     ],
   },
   {
     id: 'roomLight',
     question: 'Ta chambre la nuit, c\'est...',
-    subtitle: 'La lumiere est le signal n°1 pour ton horloge biologique.',
+    subtitle: 'La moindre lumiere bloque ta melatonine.',
     options: [
       { value: 'dark', label: 'Noir total', emoji: '🌑' },
-      { value: 'dim', label: 'Un peu de lumiere (veilleuse, volets)', emoji: '🌘' },
-      { value: 'bright', label: 'Lumiere des lampadaires / enseignes', emoji: '🏙️' },
-      { value: 'screen-glow', label: 'LED de veille, TV, telephone', emoji: '💡' },
+      { value: 'dim', label: 'Un peu de lumiere', emoji: '🌘' },
+      { value: 'bright', label: 'Lumieres de la rue', emoji: '🏙️' },
+      { value: 'screen-glow', label: 'LED, telephone en veille', emoji: '💡' },
     ],
   },
   {
     id: 'roomTemp',
     question: 'Tu as chaud ou froid la nuit ?',
-    subtitle: 'La temperature ideale pour dormir est entre 16 et 19°C.',
     options: [
-      { value: 'cold', label: 'Souvent froid(e)', emoji: '🥶' },
-      { value: 'comfortable', label: 'Temperature confortable', emoji: '😌' },
-      { value: 'warm', label: 'Souvent chaud(e)', emoji: '🥵' },
-      { value: 'variable', label: 'Ca depend des nuits', emoji: '🤷' },
+      { value: 'cold', label: 'Souvent froid', emoji: '🥶' },
+      { value: 'comfortable', label: 'Temperature OK', emoji: '😌' },
+      { value: 'warm', label: 'Souvent trop chaud', emoji: '🥵' },
+      { value: 'variable', label: 'Ca change', emoji: '🤷' },
     ],
   },
   {
     id: 'eveningMeal',
-    question: 'Ton repas du soir, c\'est plutot...',
-    subtitle: 'La digestion influence directement la qualite du sommeil.',
+    question: 'Ton repas du soir ?',
     options: [
       { value: 'light', label: 'Leger, 2-3h avant de dormir', emoji: '🥗' },
-      { value: 'heavy', label: 'Copieux ou riche en graisses', emoji: '🍔' },
-      { value: 'late', label: 'Tard, juste avant le coucher', emoji: '🕐' },
-      { value: 'skip', label: 'Je ne mange pas / je grignote', emoji: '🚫' },
+      { value: 'heavy', label: 'Copieux (pizza, burger)', emoji: '🍔' },
+      { value: 'late', label: 'Tard, juste avant de dormir', emoji: '🕐' },
+      { value: 'skip', label: 'Je saute / je grignote', emoji: '🚫' },
     ],
   },
 ];
@@ -153,14 +156,31 @@ interface CauseScore {
   score: number;
 }
 
-export function analyzeDiagnostic(answers: DiagnosticAnswers): Verdict {
+export function analyzeDiagnostic(answers: Partial<DiagnosticAnswers>): Verdict {
+  const full: DiagnosticAnswers = {
+    bedtime: answers.bedtime ?? '23-00',
+    wakeTime: answers.wakeTime ?? '7-8',
+    caffeineCount: answers.caffeineCount ?? '1-2',
+    lastCaffeineTime: answers.lastCaffeineTime ?? '12-14',
+    screenTime: answers.screenTime ?? '30-60',
+    beforeBedActivity: answers.beforeBedActivity ?? 'social',
+    exerciseFrequency: answers.exerciseFrequency ?? 'never',
+    exerciseTime: answers.exerciseTime ?? 'morning',
+    eveningMind: answers.eveningMind ?? 'slightly-agitated',
+    nightWakeups: answers.nightWakeups ?? 'rarely',
+    morningFeeling: answers.morningFeeling ?? 'slightly-tired',
+    roomLight: answers.roomLight ?? 'dim',
+    roomTemp: answers.roomTemp ?? 'comfortable',
+    eveningMeal: answers.eveningMeal ?? 'light',
+  };
+
   const scores: CauseScore[] = [
-    { cause: 'screen_addiction', score: scoreScreenAddiction(answers) },
-    { cause: 'late_caffeine', score: scoreLateCaffeine(answers) },
-    { cause: 'stress_rumination', score: scoreStressRumination(answers) },
-    { cause: 'irregular_schedule', score: scoreIrregularSchedule(answers) },
-    { cause: 'late_exercise', score: scoreLateExercise(answers) },
-    { cause: 'no_routine', score: scoreNoRoutine(answers) },
+    { cause: 'screen_addiction', score: scoreScreenAddiction(full) },
+    { cause: 'late_caffeine', score: scoreLateCaffeine(full) },
+    { cause: 'stress_rumination', score: scoreStressRumination(full) },
+    { cause: 'irregular_schedule', score: scoreIrregularSchedule(full) },
+    { cause: 'late_exercise', score: scoreLateExercise(full) },
+    { cause: 'no_routine', score: scoreNoRoutine(full) },
   ];
 
   scores.sort((a, b) => b.score - a.score);
@@ -170,7 +190,7 @@ export function analyzeDiagnostic(answers: DiagnosticAnswers): Verdict {
     .filter((s, i) => i > 0 && s.score >= 3)
     .map(s => s.cause);
 
-  return buildVerdict(primary.cause, secondary, answers);
+  return buildVerdict(primary.cause, secondary, full);
 }
 
 function scoreScreenAddiction(a: DiagnosticAnswers): number {
