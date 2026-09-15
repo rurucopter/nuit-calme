@@ -336,20 +336,59 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* Hero — visual-first */}
+      {/* Hero — value visible in <15 seconds */}
       <section className="relative z-10 px-5 pt-10 pb-16 sm:pt-16 sm:pb-24 max-w-3xl mx-auto text-center">
-        {/* Phone mockup as hero visual */}
-        <div className="flex justify-center mb-8 animate-fade-in">
-          <div className="relative w-48 sm:w-56">
+        <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold leading-[1.1] mb-5 animate-fade-in">
+          Tu dors mal.
+          <br />
+          <span className="bg-gradient-to-r from-amber via-orange to-orange-deep bg-clip-text text-transparent">
+            On sait pourquoi.
+          </span>
+        </h1>
+
+        <p className="text-base sm:text-lg text-muted max-w-md mx-auto mb-6 animate-fade-in delay-100 opacity-0 leading-relaxed">
+          Diagnostic en 2 min. Plan de 4 semaines. Rituel du soir guide.
+          <br />
+          <span className="text-soft-white font-medium">Resultats des la premiere semaine.</span>
+        </p>
+
+        <div className="animate-fade-in delay-200 opacity-0">
+          <CTAButton />
+        </div>
+
+        <p className="text-xs text-muted-dark mt-4 animate-fade-in delay-300 opacity-0">
+          Gratuit. Sans inscription. Resultat immediat.
+        </p>
+
+        {/* Social proof — users counter */}
+        <div className="flex items-center justify-center gap-3 mt-6 animate-fade-in delay-500 opacity-0">
+          <div className="flex -space-x-2">
+            {["😊", "😴", "🙂", "😌", "😃"].map((e, i) => (
+              <div
+                key={i}
+                className="w-7 h-7 rounded-full glass flex items-center justify-center text-sm border-2 border-midnight"
+              >
+                {e}
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-muted">
+            <span className="text-soft-white font-medium">+2 340</span> personnes ce mois-ci
+          </p>
+        </div>
+
+        {/* Phone mockup — below the fold on mobile */}
+        <div className="flex justify-center mt-10 animate-fade-in delay-700 opacity-0">
+          <div className="relative w-44 sm:w-52">
             <div className="rounded-[1.8rem] overflow-hidden glass-strong p-4 sm:p-5 aspect-[9/16] flex flex-col items-center justify-center relative">
               <div className="absolute inset-0 opacity-30" style={{ background: "radial-gradient(circle at 50% 40%, rgba(245,158,11,0.25), transparent 70%)" }} />
-              <div className="relative w-14 h-14 sm:w-16 sm:h-16 mb-4">
+              <div className="relative w-12 h-12 sm:w-14 sm:h-14 mb-3">
                 <div className="absolute inset-0 rounded-full bg-gradient-to-br from-orange/30 to-amber/20 blur-xl animate-breathe" />
                 <div className="absolute inset-2 rounded-full bg-gradient-to-br from-amber-light to-orange glow-amber" />
               </div>
-              <p className="text-amber-light/80 text-base font-medium mb-0.5 relative">Inspire</p>
-              <p className="text-muted/40 text-[10px] mb-4 relative">4 secondes</p>
-              <div className="flex gap-1 mb-3 relative">
+              <p className="text-amber-light/80 text-sm font-medium mb-0.5 relative">Inspire</p>
+              <p className="text-muted/40 text-[9px] mb-3 relative">4 secondes</p>
+              <div className="flex gap-1 mb-2 relative">
                 {[1,2,3,4,5].map((_,i) => (
                   <div key={i} className={`w-1.5 h-1.5 rounded-full ${i < 2 ? "bg-amber" : "bg-navy-lighter/60"}`} />
                 ))}
@@ -360,30 +399,9 @@ export default function LandingPage() {
                 ))}
               </div>
             </div>
-            <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-16 h-4 rounded-full bg-midnight/80" />
+            <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-14 h-3.5 rounded-full bg-midnight/80" />
           </div>
         </div>
-
-        <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold leading-[1.1] mb-5 animate-fade-in delay-100 opacity-0">
-          Tu dors mal.
-          <br />
-          <span className="bg-gradient-to-r from-amber via-orange to-orange-deep bg-clip-text text-transparent">
-            On sait pourquoi.
-          </span>
-        </h1>
-
-        <p className="text-base sm:text-lg text-muted max-w-md mx-auto mb-8 animate-fade-in delay-200 opacity-0 leading-relaxed">
-          Nuit Calme identifie la cause exacte de tes insomnies et te guide
-          chaque soir avec un rituel personnalise.
-        </p>
-
-        <div className="animate-fade-in delay-300 opacity-0">
-          <CTAButton />
-        </div>
-
-        <p className="text-xs text-muted-dark mt-4 animate-fade-in delay-500 opacity-0">
-          Resultat en 2 minutes. Sans engagement.
-        </p>
       </section>
 
       {/* Scrolling testimonials */}
@@ -617,6 +635,7 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-5">
             <a href="#faq" className="text-xs text-muted-dark hover:text-muted transition-colors">FAQ</a>
+            <Link href="/createurs" className="text-xs text-muted-dark hover:text-muted transition-colors">Createurs</Link>
             <span className="text-xs text-muted-dark">Fait avec soin pour tes nuits.</span>
           </div>
         </div>
