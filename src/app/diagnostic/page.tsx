@@ -161,8 +161,6 @@ function LockedResultsPhase({
   verdict: Verdict;
 }) {
   const router = useRouter();
-  const [displayScore, setDisplayScore] = useState(100);
-  const [blurred, setBlurred] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
   const { label, color } = getScoreLabel(score);
   const data =
@@ -171,38 +169,23 @@ function LockedResultsPhase({
   const targetScore = Math.min(score + 35, 92);
 
   const circumference = 2 * Math.PI * 54;
-  const offset = circumference - (displayScore / 100) * circumference;
+  const offset = circumference - (score / 100) * circumference;
 
   useEffect(() => {
-    let current = 100;
-    const interval = setInterval(() => {
-      current -= 1;
-      if (current <= score) {
-        current = score;
-        clearInterval(interval);
-      }
-      setDisplayScore(current);
-    }, 15);
-
-    const t1 = setTimeout(() => setBlurred(true), 2800);
-    const t2 = setTimeout(() => setShowOverlay(true), 3200);
-
-    return () => {
-      clearInterval(interval);
-      clearTimeout(t1);
-      clearTimeout(t2);
-    };
-  }, [score]);
+    const t = setTimeout(() => setShowOverlay(true), 600);
+    return () => clearTimeout(t);
+  }, []);
 
   return (
     <div className="min-h-dvh relative overflow-hidden">
-      {/* Background: score + consequences — gets blurred */}
+      {/* Background: score + consequences — always blurred */}
       <div
-        className="min-h-dvh flex flex-col items-center justify-start px-6 pt-12 pb-32 transition-all duration-1000"
+        className="min-h-dvh flex flex-col items-center justify-start px-6 pt-12 pb-32"
         style={{
-          filter: blurred ? "blur(12px)" : "blur(0px)",
-          transform: blurred ? "scale(1.02)" : "scale(1)",
-          pointerEvents: blurred ? "none" : "auto",
+          filter: "blur(12px)",
+          transform: "scale(1.02)",
+          pointerEvents: "none",
+          userSelect: "none",
         }}
       >
         <div className="max-w-md w-full text-center">
@@ -228,7 +211,7 @@ function LockedResultsPhase({
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className={`text-4xl font-bold ${color}`}>{displayScore}</span>
+              <span className={`text-4xl font-bold ${color}`}>{score}</span>
               <span className="text-[10px] text-muted-dark">/100</span>
             </div>
           </div>
@@ -296,16 +279,16 @@ function LockedResultsPhase({
           </div>
 
           <h2 className="text-2xl sm:text-3xl font-bold mb-3 leading-tight">
-            Ton bilan est{" "}
+            Ton resultat est{" "}
             <span className="bg-gradient-to-r from-amber to-orange bg-clip-text text-transparent">
               pret
             </span>
           </h2>
 
           <p className="text-muted text-sm leading-relaxed mb-6 max-w-xs mx-auto">
-            10 min/soir. 4 semaines.{" "}
+            Score, cause, programme personnalise —{" "}
             <span className="text-soft-white font-medium">
-              Ton sommeil repare.
+              tout est la. Debloque-le.
             </span>
           </p>
 
@@ -358,7 +341,7 @@ function LockedResultsPhase({
             onClick={() => router.push("/offre")}
             className="w-full px-8 py-4 rounded-2xl glass-btn-solid text-midnight font-bold text-lg hover:scale-[1.02] active:scale-[0.98] mb-3"
           >
-            Voir mon plan personnalise
+            Debloquer mon resultat
           </button>
 
           <p className="text-[10px] text-muted-dark">
