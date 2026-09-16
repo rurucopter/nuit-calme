@@ -5,6 +5,8 @@ import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
 import { getUserData } from "@/lib/storage";
 
+const CTA_HREF = "/diagnostic";
+
 function useReveal() {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -27,6 +29,37 @@ function useReveal() {
   return ref;
 }
 
+function useCountUp(target: number, duration = 1500) {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLDivElement>(null);
+  const started = useRef(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !started.current) {
+          started.current = true;
+          const t0 = performance.now();
+          const tick = (now: number) => {
+            const p = Math.min((now - t0) / duration, 1);
+            const eased = 1 - Math.pow(1 - p, 3);
+            setCount(Math.round(eased * target));
+            if (p < 1) requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        }
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [target, duration]);
+
+  return { count, ref };
+}
+
 function LiveNightSky() {
   const [stars, setStars] = useState<
     { x: number; y: number; size: number; delay: number; dur: number }[]
@@ -34,13 +67,10 @@ function LiveNightSky() {
   const [shootingStars, setShootingStars] = useState<
     { x: number; y: number; delay: number; angle: number }[]
   >([]);
-  const [clouds, setClouds] = useState<
-    { x: number; y: number; w: number; opacity: number; speed: number }[]
-  >([]);
 
   useEffect(() => {
     setStars(
-      Array.from({ length: 80 }, () => ({
+      Array.from({ length: 70 }, () => ({
         x: Math.random() * 100,
         y: Math.random() * 60,
         size: Math.random() * 2.5 + 0.3,
@@ -49,20 +79,11 @@ function LiveNightSky() {
       }))
     );
     setShootingStars(
-      Array.from({ length: 3 }, () => ({
+      Array.from({ length: 2 }, () => ({
         x: 10 + Math.random() * 80,
         y: 5 + Math.random() * 30,
-        delay: 2 + Math.random() * 12,
+        delay: 3 + Math.random() * 15,
         angle: 25 + Math.random() * 20,
-      }))
-    );
-    setClouds(
-      Array.from({ length: 4 }, (_, i) => ({
-        x: -20 + i * 30,
-        y: 15 + Math.random() * 40,
-        w: 200 + Math.random() * 150,
-        opacity: 0.03 + Math.random() * 0.04,
-        speed: 60 + Math.random() * 40,
       }))
     );
   }, []);
@@ -102,53 +123,36 @@ function LiveNightSky() {
           }}
         />
       ))}
-      {clouds.map((c, i) => (
-        <div
-          key={`c${i}`}
-          className="absolute rounded-full animate-drift-cloud"
-          style={{
-            left: `${c.x}%`,
-            top: `${c.y}%`,
-            width: c.w,
-            height: c.w * 0.3,
-            background: `radial-gradient(ellipse, rgba(148,163,184,${c.opacity}), transparent 70%)`,
-            animationDuration: `${c.speed}s`,
-            filter: "blur(20px)",
-          }}
-        />
-      ))}
       <div
         className="absolute animate-breathe"
         style={{
-          right: "12%",
-          top: "8%",
-          width: 120,
-          height: 120,
+          right: "10%",
+          top: "6%",
+          width: 100,
+          height: 100,
           borderRadius: "50%",
           background:
-            "radial-gradient(circle, rgba(251,191,36,0.15), transparent 70%)",
+            "radial-gradient(circle, rgba(251,191,36,0.12), transparent 70%)",
           filter: "blur(10px)",
         }}
       />
       <div
         className="absolute"
         style={{
-          right: "14%",
-          top: "10%",
-          width: 60,
-          height: 60,
+          right: "12%",
+          top: "8%",
+          width: 50,
+          height: 50,
           borderRadius: "50%",
           background:
             "radial-gradient(circle at 35% 35%, #fde68a, #f5a623, #f0725c)",
           boxShadow:
-            "0 0 40px rgba(245,166,35,0.3), 0 0 80px rgba(245,166,35,0.1)",
+            "0 0 40px rgba(245,166,35,0.25), 0 0 80px rgba(245,166,35,0.08)",
         }}
       />
     </div>
   );
 }
-
-const CTA_HREF = "/diagnostic";
 
 function CTAButton({
   className = "",
@@ -162,7 +166,7 @@ function CTAButton({
   return (
     <Link
       href={CTA_HREF}
-      className={`group relative inline-block rounded-2xl glass-btn-solid text-midnight font-semibold hover:scale-[1.02] active:scale-[0.98] overflow-hidden ${
+      className={`group relative inline-block rounded-2xl glass-btn-solid text-midnight font-semibold hover:scale-[1.02] active:scale-[0.98] overflow-hidden transition-transform ${
         size === "lg" ? "px-8 py-4 text-lg" : "px-6 py-3 text-base"
       } ${className}`}
     >
@@ -172,87 +176,29 @@ function CTAButton({
   );
 }
 
-const testimonials = [
-  {
-    name: "Lea, 22 — etudiante",
-    text: "Periode de partiels, je dormais 4h. Maintenant je m'endors en 10 min.",
-    result: "-35 min",
-    rating: 5,
-  },
-  {
-    name: "Thomas, 25 — dev",
-    text: "Le rituel du soir me met KO. Plus besoin de scroller jusqu'a 2h.",
-    result: "7 jours",
-    rating: 5,
-  },
-  {
-    name: "Sarah, 20 — en alternance",
-    text: "Stress du taf + cours = insomnies. Le diagnostic a trouve la cause en 2 min.",
-    result: "1 cause",
-    rating: 5,
-  },
-  {
-    name: "Julien, 27 — freelance",
-    text: "Mon cerveau ne s'arretait jamais le soir. La respiration guidee, c'est game changer.",
-    result: "x2",
-    rating: 5,
-  },
-  {
-    name: "Antoine, 19 — etudiant",
-    text: "J'ai arrete le doom scroll au lit. 2 semaines plus tard, tout a change.",
-    result: "14 jours",
-    rating: 5,
-  },
-  {
-    name: "Camille, 24 — infirmiere",
-    text: "Horaires decales, stress permanent. La veilleuse ocean + pluie, mon combo magique.",
-    result: "chaque soir",
-    rating: 5,
-  },
-  {
-    name: "Lucas, 26 — commercial",
-    text: "L'anxiete me reveillait a 4h du mat. Maintenant je dors d'une traite.",
-    result: "nuit entiere",
-    rating: 5,
-  },
-  {
-    name: "Marie, 21 — en master",
-    text: "Les micro-habitudes sont geniales. Petits gestes, enorme difference sur mon stress.",
-    result: "3 sem.",
-    rating: 5,
-  },
-];
+function StickyMobileCTA() {
+  const [visible, setVisible] = useState(false);
 
-function ScrollingTestimonials() {
+  useEffect(() => {
+    const onScroll = () => setVisible(window.scrollY > 500);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <div className="relative overflow-hidden py-6">
-      <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-midnight to-transparent z-10 pointer-events-none" />
-      <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-midnight to-transparent z-10 pointer-events-none" />
-      <div className="flex gap-4 animate-scroll-left">
-        {[...testimonials, ...testimonials].map((t, i) => (
-          <div key={i} className="flex-shrink-0 w-72 glass-light rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex gap-0.5">
-                {Array.from({ length: 5 }).map((_, j) => (
-                  <span
-                    key={j}
-                    className={`text-xs ${j < t.rating ? "text-amber" : "text-navy-lighter"}`}
-                  >
-                    ★
-                  </span>
-                ))}
-              </div>
-              <span className="text-[10px] font-bold text-amber glass-accent px-2 py-0.5 rounded-full">
-                {t.result}
-              </span>
-            </div>
-            <p className="text-sm text-muted leading-relaxed mb-3">
-              &ldquo;{t.text}&rdquo;
-            </p>
-            <p className="text-xs font-medium text-soft-white/70">{t.name}</p>
-          </div>
-        ))}
-      </div>
+    <div
+      className={`fixed bottom-0 left-0 right-0 z-50 p-3 pt-6 bg-gradient-to-t from-midnight via-midnight/95 to-transparent sm:hidden transition-all duration-300 ${
+        visible
+          ? "translate-y-0 opacity-100"
+          : "translate-y-full opacity-0"
+      }`}
+    >
+      <Link
+        href={CTA_HREF}
+        className="block w-full text-center px-6 py-3.5 rounded-2xl glass-btn-solid text-midnight font-semibold text-base"
+      >
+        Diagnostic gratuit — 2 min
+      </Link>
     </div>
   );
 }
@@ -262,23 +208,27 @@ function FAQ() {
   const items = [
     {
       q: "C'est vraiment gratuit le diagnostic ?",
-      a: "Oui. Le diagnostic est 100% gratuit, sans inscription et sans email. Tu as ton resultat en 2 minutes. Le programme complet est payant.",
+      a: "Oui. 6 questions, zero inscription, zero email. Tu as ton resultat en 2 minutes. Le programme personnalise est payant.",
+    },
+    {
+      q: "En quoi c'est different des autres apps de sommeil ?",
+      a: "Les autres te donnent un score. Nous, on identifie LA cause de ton probleme — ecrans, stress, cafeine, horaires — et on te donne un plan specifique pour la reparer. Pas de meditation generique.",
     },
     {
       q: "Ca marche pour l'insomnie chronique ?",
-      a: "Nuit Calme cible les mauvaises habitudes de sommeil. Pour l'insomnie chronique diagnostiquee, consulte un medecin. Nos outils peuvent completer un suivi medical.",
+      a: "Nuit Calme cible les mauvaises habitudes qui detruisent ton sommeil. Pour l'insomnie diagnostiquee par un medecin, nos outils peuvent completer un suivi medical.",
     },
     {
       q: "Combien de temps pour voir des resultats ?",
-      a: "La plupart des utilisateurs sentent une difference des la premiere semaine. Les habitudes s'ancrent en 2-3 semaines.",
+      a: "La majorite des utilisateurs sentent une difference des la premiere semaine. Les habitudes s'ancrent en 2-3 semaines. Le programme complet dure 4 semaines.",
     },
     {
-      q: "Mes donnees sont securisees ?",
-      a: "Tes donnees restent sur ton appareil. Aucune information sensible ne transite par nos serveurs.",
+      q: "J'ai pas le temps pour un programme",
+      a: "10 minutes le soir, c'est tout. Le rituel est guide — tu te laisses porter. Les micro-habitudes sont si petites que tu ne peux pas echouer.",
     },
     {
       q: "Ca marche sur iPhone et Android ?",
-      a: "Oui. L'app s'installe comme une app native — pas besoin de passer par l'App Store ou le Play Store.",
+      a: "Oui. L'app s'installe comme une app native depuis ton navigateur — pas besoin de l'App Store ou du Play Store.",
     },
   ];
 
@@ -312,6 +262,30 @@ function FAQ() {
   );
 }
 
+const testimonials = [
+  {
+    name: "Lea, 22",
+    context: "Etudiante en droit",
+    text: "Periode de partiels, je dormais 4h par nuit. Le diagnostic a trouve que c'etait les ecrans + le stress. En 2 semaines, je m'endors en 10 min.",
+    result: "-35 min d'endormissement",
+    avatar: "L",
+  },
+  {
+    name: "Thomas, 25",
+    context: "Developpeur web",
+    text: "Mon cerveau ne s'arretait jamais le soir. La respiration 4-7-8 + les sons d'ocean, c'est devenu mon rituel sacre. Plus besoin de scroller jusqu'a 2h.",
+    result: "7 jours pour le changement",
+    avatar: "T",
+  },
+  {
+    name: "Sarah, 20",
+    context: "En alternance",
+    text: "Stress du taf + cours = insomnies. J'etais sceptique mais le diagnostic a tape en plein dans le mille. Score passe de 38 a 76 en 3 semaines.",
+    result: "Score x2 en 3 semaines",
+    avatar: "S",
+  },
+];
+
 export default function LandingPage() {
   const [hasData, setHasData] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -324,47 +298,54 @@ export default function LandingPage() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const painRef = useReveal();
+  const problemRef = useReveal();
+  const bridgeRef = useReveal();
   const stepsRef = useReveal();
-  const transformRef = useReveal();
-  const ritualRef = useReveal();
-  const objectionsRef = useReveal();
+  const featuresRef = useReveal();
+  const proofRef = useReveal();
+  const costRef = useReveal();
   const faqRef = useReveal();
   const ctaRef = useReveal();
 
+  const stat1 = useCountUp(87);
+  const stat2 = useCountUp(35);
+  const stat3 = useCountUp(2340);
+
   return (
     <div className="relative overflow-x-hidden">
-      {/* Hero background */}
-      <div className="absolute inset-0 h-[110vh] overflow-hidden pointer-events-none">
-        <Image
-          src="/images/hero-night.jpg"
-          alt=""
-          fill
-          className="object-cover object-center"
-          priority
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-midnight/50 via-midnight/60 to-midnight" />
-      </div>
+      <StickyMobileCTA />
 
-      <LiveNightSky />
+      {/* ==================== HERO ==================== */}
+      <div className="relative min-h-dvh flex flex-col">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <Image
+            src="/images/hero-night.jpg"
+            alt=""
+            fill
+            className="object-cover object-center"
+            priority
+            sizes="100vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-midnight/40 via-midnight/60 to-midnight" />
+        </div>
 
-      {/* Nav */}
-      <nav
-        className={`sticky top-0 z-50 transition-all duration-300 ${
-          scrolled ? "glass" : ""
-        }`}
-      >
-        <div className="flex items-center justify-between px-5 py-3.5 max-w-6xl mx-auto">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber to-orange flex items-center justify-center text-midnight font-bold text-sm">
-              NC
+        <LiveNightSky />
+
+        {/* Nav */}
+        <nav
+          className={`sticky top-0 z-50 transition-all duration-300 ${
+            scrolled ? "glass" : ""
+          }`}
+        >
+          <div className="flex items-center justify-between px-5 py-3.5 max-w-6xl mx-auto">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber to-orange flex items-center justify-center text-midnight font-bold text-sm">
+                NC
+              </div>
+              <span className="font-semibold text-lg text-soft-white">
+                Nuit Calme
+              </span>
             </div>
-            <span className="font-semibold text-lg text-soft-white">
-              Nuit Calme
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
             {hasData ? (
               <Link
                 href="/dashboard"
@@ -375,263 +356,574 @@ export default function LandingPage() {
             ) : (
               <CTAButton
                 size="md"
-                text="Diagnostic gratuit"
+                text="Diagnostic"
                 className="!rounded-full !px-5 !py-2 !text-sm"
               />
             )}
           </div>
-        </div>
-      </nav>
+        </nav>
 
-      {/* ============================================ */}
-      {/* HERO — hook + CTA above the fold             */}
-      {/* ============================================ */}
-      <section className="relative z-10 px-5 pt-10 pb-8 sm:pt-16 sm:pb-12 max-w-3xl mx-auto text-center">
-        <p className="text-xs sm:text-sm text-amber/80 font-medium mb-4 animate-fade-in tracking-wide">
-          Pour les 18-28 ans qui n&apos;arrivent plus a dormir
-        </p>
-        <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold leading-[1.1] mb-5 animate-fade-in">
-          Stresse. Epuise.
-          <br />
-          <span className="bg-gradient-to-r from-amber via-orange to-orange-deep bg-clip-text text-transparent">
-            Tu merites de dormir.
-          </span>
-        </h1>
+        {/* Hero content */}
+        <section className="relative z-10 flex-1 flex flex-col justify-center px-5 pb-16 pt-4 sm:pt-0 max-w-3xl mx-auto text-center w-full">
+          <div className="inline-flex items-center gap-2 glass-light rounded-full px-4 py-1.5 mx-auto mb-6 animate-fade-in">
+            <span className="text-amber text-xs font-semibold">4.8 ★</span>
+            <span className="w-px h-3 bg-white/10" />
+            <span className="text-xs text-muted">
+              +2 340 membres de 18-28 ans
+            </span>
+          </div>
 
-        <p className="text-base sm:text-lg text-muted max-w-lg mx-auto mb-7 animate-fade-in delay-100 opacity-0 leading-relaxed">
-          Exams, boulot, anxiete, ecrans — ton cerveau ne s&apos;arrete jamais.
-          <br />
-          <span className="text-soft-white font-medium">
-            En 2 min, on trouve pourquoi tu dors mal. Pas un score — une vraie reponse.
-          </span>
-        </p>
+          <h1 className="text-[2rem] sm:text-5xl md:text-6xl font-bold leading-[1.1] mb-5 animate-fade-in">
+            Tu scrolles. Tu rumines.
+            <br />
+            <span className="bg-gradient-to-r from-amber via-orange to-orange-deep bg-clip-text text-transparent">
+              Tu ne dors pas.
+            </span>
+          </h1>
 
-        <div className="animate-fade-in delay-200 opacity-0 flex flex-col items-center gap-3">
-          <CTAButton />
-          <span className="text-xs text-muted-dark">
-            Gratuit · Sans inscription · 2 minutes
-          </span>
-        </div>
-      </section>
+          <p className="text-base sm:text-lg text-muted max-w-md mx-auto mb-8 animate-fade-in delay-100 opacity-0 leading-relaxed">
+            En <span className="text-soft-white font-medium">2 minutes</span>,
+            on identifie ta cause.
+            <br />
+            En{" "}
+            <span className="text-soft-white font-medium">4 semaines</span>, on
+            la repare.
+          </p>
 
-      {/* ============================================ */}
-      {/* TRUST BAR — chiffres cles en un coup d'oeil  */}
-      {/* ============================================ */}
-      <section className="relative z-10 px-5 pb-10 sm:pb-14 animate-fade-in delay-500 opacity-0">
-        <div className="max-w-2xl mx-auto">
-          <div className="glass rounded-2xl px-4 py-3 flex items-center justify-around gap-2">
-            {[
-              { value: "4.8 ★", label: "note moyenne" },
-              { value: "+2 340", label: "18-28 ans" },
-              { value: "7 jours", label: "premiers resultats" },
-              { value: "2 min", label: "diagnostic" },
-            ].map((item) => (
-              <div key={item.label} className="text-center">
-                <p className="text-sm sm:text-base font-bold text-amber">
-                  {item.value}
-                </p>
-                <p className="text-[9px] sm:text-[10px] text-muted-dark">
-                  {item.label}
-                </p>
-              </div>
-            ))}
+          <div className="animate-fade-in delay-200 opacity-0 flex flex-col items-center gap-3">
+            <CTAButton />
+            <span className="text-xs text-muted-dark">
+              Gratuit · Sans inscription · Resultat immediat
+            </span>
+          </div>
+
+          {/* Trust micro-bar */}
+          <div className="mt-12 animate-fade-in delay-500 opacity-0">
+            <div className="flex items-center justify-center gap-6 sm:gap-10">
+              {[
+                { value: "87%", label: "voient des resultats" },
+                { value: "2 min", label: "de diagnostic" },
+                { value: "-35 min", label: "d'endormissement" },
+              ].map((s) => (
+                <div key={s.label} className="text-center">
+                  <p className="text-sm sm:text-base font-bold text-amber">
+                    {s.value}
+                  </p>
+                  <p className="text-[9px] sm:text-[10px] text-muted-dark">
+                    {s.label}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Scroll indicator */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 animate-float">
+          <div className="w-5 h-8 rounded-full border border-white/20 flex items-start justify-center p-1.5">
+            <div className="w-1 h-2 rounded-full bg-amber/60 animate-pulse-soft" />
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* ============================================ */}
-      {/* PAIN — "Tu reconnais ca?"                    */}
-      {/* ============================================ */}
+      {/* ==================== PROBLEM ==================== */}
       <section
-        className="relative z-10 px-5 py-16 sm:py-20 overflow-hidden"
-        ref={painRef}
+        className="relative z-10 px-5 py-20 sm:py-28 overflow-hidden"
+        ref={problemRef}
       >
         <div className="absolute inset-0 -z-10 pointer-events-none">
           <Image
             src="/images/night-stars.jpg"
             alt=""
             fill
-            className="object-cover opacity-15"
+            className="object-cover opacity-10"
             sizes="100vw"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-midnight via-midnight/85 to-midnight" />
+          <div className="absolute inset-0 bg-gradient-to-b from-midnight via-midnight/90 to-midnight" />
         </div>
+
         <div className="max-w-2xl mx-auto">
-          <div className="reveal text-center mb-10">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold leading-tight mb-3">
-              Ca te parle ?
-            </h2>
-            <p className="text-muted text-sm sm:text-base">
-              Ce n&apos;est pas &ldquo;juste du stress&rdquo;. C&apos;est un
-              cercle vicieux qui ruine tes journees.
-            </p>
-          </div>
-
-          <div className="space-y-3">
-            {[
-              {
-                emoji: "📱",
-                text: "23h : TikTok, Insta, YouTube Shorts. \"Encore 5 min.\" Il est 1h30.",
-              },
-              {
-                emoji: "🧠",
-                text: "Lumiere eteinte. Ton cerveau : le partiel de lundi, le taf, ce message que t'as pas repondu...",
-              },
-              {
-                emoji: "😰",
-                text: "L'anxiete monte. Tu sens ton coeur qui bat. Impossible de lacher prise.",
-              },
-              {
-                emoji: "⏰",
-                text: "2h14. Tu calcules : \"il me reste 4h46 de sommeil.\" Ca empire.",
-              },
-              {
-                emoji: "☕",
-                text: "Le lendemain : 3 cafes, zero concentration, irritable. Et ca recommence ce soir.",
-              },
-              {
-                emoji: "💊",
-                text: "\"J'ai essaye la melatonine, les tisanes, le mode avion.\" Rien ne tient.",
-              },
-            ].map((item, i) => (
-              <div
-                key={i}
-                className={`reveal reveal-delay-${Math.min(i + 1, 4)} glass-light rounded-2xl px-5 py-4 flex items-center gap-4`}
-              >
-                <span className="text-xl flex-shrink-0">{item.emoji}</span>
-                <p className="text-sm text-soft-white/90 leading-relaxed">
-                  {item.text}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <div className="reveal reveal-delay-4 text-center mt-8">
-            <p className="text-muted text-sm mb-1">
-              Si tu as coche mentalement au moins 2 lignes :
-            </p>
-            <p className="text-soft-white font-semibold">
-              Le probleme, c&apos;est pas que t&apos;es &ldquo;trop
-              stresse&rdquo;.
-              <br />
-              C&apos;est que personne ne t&apos;a montre{" "}
-              <span className="text-amber">comment couper</span>.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ============================================ */}
-      {/* SOCIAL PROOF — scrolling testimonials         */}
-      {/* ============================================ */}
-      <section className="relative z-10 py-4">
-        <ScrollingTestimonials />
-      </section>
-
-      {/* ============================================ */}
-      {/* HOW IT WORKS — 3 etapes                      */}
-      {/* ============================================ */}
-      <section
-        id="comment-ca-marche"
-        className="relative z-10 px-5 py-16 sm:py-20"
-        ref={stepsRef}
-      >
-        <div className="max-w-3xl mx-auto">
           <div className="reveal text-center mb-12">
             <p className="text-amber text-xs font-medium mb-3 uppercase tracking-widest">
-              Simple et rapide
+              Chaque soir, meme scenario
             </p>
-            <h2 className="text-2xl sm:text-3xl font-bold">
-              3 etapes. Ce soir, tu dors mieux.
+            <h2 className="text-2xl sm:text-4xl font-bold leading-tight">
+              Tu connais cette boucle.
             </h2>
           </div>
 
-          <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-3 sm:gap-5">
+          <div className="space-y-4">
             {[
               {
-                step: "1",
-                title: "Diagnostic",
-                desc: "14 questions sur ton stress, tes habitudes, ton sommeil. On identifie LA cause.",
-                time: "2 min",
-                icon: "🔍",
+                time: "23h",
+                title: "Le soir",
+                text: "Tu te couches. Tu prends ton telephone. \"Encore 5 min.\" TikTok, Insta, YouTube Shorts. Il est 1h30. Ton cerveau est en mode alerte.",
               },
               {
-                step: "2",
-                title: "Ton plan anti-stress",
-                desc: "4 semaines de micro-habitudes pour casser le cycle stress → insomnie.",
-                time: "personnalise",
-                icon: "📋",
+                time: "3h",
+                title: "La nuit",
+                text: "Tu eteins. Les pensees arrivent. Le partiel de lundi. Le taf. Ce truc que t'as dit hier. L'anxiete monte. Tu regardes l'heure : 3h14.",
               },
               {
-                step: "3",
-                title: "Rituel du soir",
-                desc: "Respiration guidee + sons + veilleuse. Ton cerveau apprend a couper.",
-                time: "10 min/soir",
-                icon: "🌙",
+                time: "7h",
+                title: "Le matin",
+                text: "Reveil. Epuise. 3 cafes pour tenir. Zero concentration. Irritable avec tout le monde. Et ce soir... meme scenario.",
               },
-            ].map((item, i) => (
+            ].map((scenario, i) => (
               <div
-                key={item.step}
-                className={`reveal reveal-delay-${i + 1} glass-light rounded-2xl p-5`}
+                key={scenario.time}
+                className={`reveal reveal-delay-${i + 1} glass rounded-2xl p-6 relative overflow-hidden`}
               >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber to-orange flex items-center justify-center text-midnight font-bold text-sm flex-shrink-0">
-                      {item.step}
-                    </div>
-                    <span className="text-xl">{item.icon}</span>
+                <div
+                  className="absolute inset-0 opacity-30 pointer-events-none"
+                  style={{
+                    background: `linear-gradient(135deg, rgba(155,122,235,0.08), transparent)`,
+                  }}
+                />
+                <div className="relative">
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-amber font-mono text-sm font-bold">
+                      {scenario.time}
+                    </span>
+                    <span className="w-8 h-px bg-amber/30" />
+                    <span className="text-xs text-muted uppercase tracking-wider">
+                      {scenario.title}
+                    </span>
                   </div>
-                  <span className="text-[10px] text-amber glass-accent px-2 py-0.5 rounded-full">
-                    {item.time}
-                  </span>
+                  <p className="text-sm sm:text-base text-soft-white/85 leading-relaxed">
+                    {scenario.text}
+                  </p>
                 </div>
-                <h3 className="font-semibold mb-1.5">{item.title}</h3>
-                <p className="text-muted text-sm leading-relaxed">
-                  {item.desc}
-                </p>
               </div>
             ))}
           </div>
 
           <div className="reveal reveal-delay-4 text-center mt-10">
-            <CTAButton text="Commencer mon diagnostic" />
+            <p className="text-muted text-sm mb-2">
+              Si tu t&apos;es reconnu dans au moins une ligne :
+            </p>
+            <p className="text-soft-white font-semibold text-base sm:text-lg leading-snug">
+              Le probleme, c&apos;est pas que tu es &ldquo;trop
+              stresse&rdquo;.
+              <br />
+              C&apos;est que{" "}
+              <span className="text-amber">
+                personne ne t&apos;a montre comment couper
+              </span>
+              .
+            </p>
           </div>
         </div>
       </section>
 
-      {/* ============================================ */}
-      {/* TRANSFORMATION — avant / apres               */}
-      {/* ============================================ */}
+      {/* ==================== BRIDGE ==================== */}
       <section
-        className="relative z-10 px-5 py-16 sm:py-20"
-        ref={transformRef}
+        className="relative z-10 px-5 py-16 sm:py-24"
+        ref={bridgeRef}
       >
-        <div className="max-w-2xl mx-auto">
-          <div className="reveal text-center mb-10">
+        <div className="max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-10 md:gap-14 items-center">
+            <div className="reveal order-2 md:order-1">
+              <p className="text-amber text-xs font-medium mb-4 uppercase tracking-widest">
+                L&apos;approche Nuit Calme
+              </p>
+              <h2 className="text-2xl sm:text-3xl font-bold mb-5 leading-tight">
+                On ne te donne pas un score.
+                <br />
+                <span className="text-amber">
+                  On trouve ta cause.
+                </span>
+              </h2>
+              <p className="text-muted text-sm sm:text-base leading-relaxed mb-6">
+                Les apps de sommeil te disent &ldquo;tu dors mal&rdquo;. Merci,
+                tu le savais. Nuit Calme identifie{" "}
+                <span className="text-soft-white font-medium">pourquoi</span>{" "}
+                tu dors mal — ecrans, stress, cafeine, horaires — et te donne un
+                plan pour reparer{" "}
+                <span className="text-soft-white font-medium">ta</span> cause.
+              </p>
+              <div className="space-y-3">
+                {[
+                  "Addiction aux ecrans le soir",
+                  "Stress et ruminations nocturnes",
+                  "Cafeine trop tardive",
+                  "Horaires de sommeil irreguliers",
+                  "Absence de routine du soir",
+                ].map((cause) => (
+                  <div key={cause} className="flex items-center gap-3">
+                    <div className="w-1.5 h-1.5 rounded-full bg-amber flex-shrink-0" />
+                    <span className="text-sm text-soft-white/80">{cause}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* App mockup */}
+            <div className="reveal reveal-delay-2 order-1 md:order-2 flex justify-center">
+              <div className="relative w-56 sm:w-64">
+                <div className="rounded-[2rem] overflow-hidden glass-strong p-6 aspect-[9/17] flex flex-col relative">
+                  <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                      background:
+                        "radial-gradient(ellipse at 50% 30%, rgba(245,166,35,0.06), transparent 70%)",
+                    }}
+                  />
+                  <div className="relative flex-1 flex flex-col">
+                    <p className="text-[10px] text-muted text-center mb-4">
+                      Ton diagnostic
+                    </p>
+                    <div className="flex-1 flex flex-col items-center justify-center">
+                      <div className="relative w-20 h-20 mb-4">
+                        <svg
+                          viewBox="0 0 120 120"
+                          className="w-full h-full -rotate-90"
+                        >
+                          <circle
+                            cx="60"
+                            cy="60"
+                            r="50"
+                            fill="none"
+                            stroke="rgba(155,122,235,0.1)"
+                            strokeWidth="6"
+                          />
+                          <circle
+                            cx="60"
+                            cy="60"
+                            r="50"
+                            fill="none"
+                            stroke="#f0725c"
+                            strokeWidth="6"
+                            strokeLinecap="round"
+                            strokeDasharray={2 * Math.PI * 50}
+                            strokeDashoffset={
+                              2 * Math.PI * 50 - (42 / 100) * 2 * Math.PI * 50
+                            }
+                          />
+                        </svg>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-xl font-bold text-orange">
+                            42
+                          </span>
+                        </div>
+                      </div>
+                      <p className="text-xs font-semibold text-soft-white mb-1">
+                        Sommeil fragile
+                      </p>
+                      <p className="text-[10px] text-muted mb-4">
+                        Cause : stress + ecrans
+                      </p>
+                    </div>
+                    <div className="glass-light rounded-xl p-3">
+                      <p className="text-[9px] text-amber font-medium mb-2 uppercase tracking-wider">
+                        Ton plan
+                      </p>
+                      {["Sem. 1 — Routine ecrans", "Sem. 2 — Respiration", "Sem. 3 — Habitudes", "Sem. 4 — Ancrage"].map(
+                        (w, i) => (
+                          <div
+                            key={w}
+                            className="flex items-center gap-2 mb-1.5 last:mb-0"
+                          >
+                            <div
+                              className={`w-3 h-3 rounded-full flex items-center justify-center ${
+                                i === 0
+                                  ? "bg-amber/20 border border-amber/40"
+                                  : "bg-white/5 border border-white/10"
+                              }`}
+                            >
+                              {i === 0 && (
+                                <div className="w-1 h-1 rounded-full bg-amber" />
+                              )}
+                            </div>
+                            <span
+                              className={`text-[9px] ${i === 0 ? "text-soft-white" : "text-muted-dark"}`}
+                            >
+                              {w}
+                            </span>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute top-2 left-1/2 -translate-x-1/2 w-16 h-4 rounded-full bg-midnight/80" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ==================== HOW IT WORKS ==================== */}
+      <section
+        id="comment-ca-marche"
+        className="relative z-10 px-5 py-16 sm:py-24"
+        ref={stepsRef}
+      >
+        <div className="max-w-3xl mx-auto">
+          <div className="reveal text-center mb-14">
             <p className="text-amber text-xs font-medium mb-3 uppercase tracking-widest">
-              La difference
+              Comment ca marche
             </p>
-            <h2 className="text-2xl sm:text-3xl font-bold">
-              Sans Nuit Calme vs. avec
+            <h2 className="text-2xl sm:text-4xl font-bold">
+              3 etapes.{" "}
+              <span className="text-amber">Ce soir, tu dors mieux.</span>
             </h2>
           </div>
 
-          <div className="reveal reveal-delay-1 grid grid-cols-2 gap-3 sm:gap-4">
-            {/* Before */}
-            <div className="glass rounded-2xl p-5 border-rose/10">
+          <div className="relative">
+            <div className="hidden sm:block absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-amber/30 via-amber/10 to-transparent -translate-x-1/2 z-0" />
+
+            <div className="space-y-6 sm:space-y-10 relative z-10">
+              {[
+                {
+                  step: "01",
+                  title: "Diagnostic — 2 min",
+                  desc: "6 questions sur ton stress, tes habitudes, tes ecrans. Pas de bla-bla — on va droit a la cause.",
+                  detail: "Gratuit et sans inscription",
+                  icon: "🔍",
+                },
+                {
+                  step: "02",
+                  title: "Ton programme personnalise",
+                  desc: "4 semaines de micro-habitudes calibrees sur TA cause. Pas un programme generique — un plan adapte a ce qui te fait mal dormir.",
+                  detail: "Adapte a ta cause",
+                  icon: "📋",
+                },
+                {
+                  step: "03",
+                  title: "Rituel du soir — 10 min",
+                  desc: "Respiration guidee, sons d'ambiance, veilleuse. Ton cerveau apprend a couper. En 10 min, tu passes de 100 a 0.",
+                  detail: "Chaque soir",
+                  icon: "🌙",
+                },
+              ].map((item, i) => (
+                <div
+                  key={item.step}
+                  className={`reveal reveal-delay-${i + 1}`}
+                >
+                  <div className="glass rounded-2xl p-6 sm:max-w-md sm:mx-auto">
+                    <div className="flex items-start gap-4">
+                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber/20 to-orange/20 border border-amber/20 flex items-center justify-center text-lg flex-shrink-0">
+                        {item.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="text-amber font-mono text-xs font-bold">
+                            {item.step}
+                          </span>
+                          <span className="text-[10px] text-amber/60 glass-accent px-2 py-0.5 rounded-full">
+                            {item.detail}
+                          </span>
+                        </div>
+                        <h3 className="font-semibold text-base mb-1.5">
+                          {item.title}
+                        </h3>
+                        <p className="text-muted text-sm leading-relaxed">
+                          {item.desc}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="reveal reveal-delay-4 text-center mt-12">
+            <CTAButton text="Commencer mon diagnostic" />
+            <p className="text-xs text-muted-dark mt-3">
+              2 minutes. Resultat immediat.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ==================== FEATURES ==================== */}
+      <section
+        className="relative z-10 px-5 py-16 sm:py-24 overflow-hidden"
+        ref={featuresRef}
+      >
+        <div className="absolute inset-0 -z-10 pointer-events-none">
+          <Image
+            src="/images/moon-clouds.jpg"
+            alt=""
+            fill
+            className="object-cover opacity-8"
+            sizes="100vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-midnight via-midnight/95 to-midnight" />
+        </div>
+
+        <div className="max-w-3xl mx-auto">
+          <div className="reveal text-center mb-12">
+            <p className="text-amber text-xs font-medium mb-3 uppercase tracking-widest">
+              Ce que tu debloques
+            </p>
+            <h2 className="text-2xl sm:text-3xl font-bold">
+              Tout ce qu&apos;il faut pour{" "}
+              <span className="text-amber">reparer ton sommeil</span>
+            </h2>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            {[
+              {
+                icon: "🫁",
+                title: "Respiration guidee",
+                desc: "4-7-8, coherence cardiaque, technique militaire. Guidee phase par phase avec retour visuel.",
+              },
+              {
+                icon: "🎵",
+                title: "Sons d'ambiance",
+                desc: "Pluie, ocean, foret, feu de camp. Des sons immersifs, pas des boucles de 30 secondes.",
+              },
+              {
+                icon: "💡",
+                title: "Veilleuse intelligente",
+                desc: "5 ambiances calibrees sur ta cause. Lumiere douce qui baisse ton niveau d'eveil.",
+              },
+              {
+                icon: "📊",
+                title: "Suivi & patterns",
+                desc: "Check-in matin + soir. On detecte tes patterns et on ajuste ton programme en temps reel.",
+              },
+            ].map((feature, i) => (
+              <div
+                key={feature.title}
+                className={`reveal reveal-delay-${i + 1} glass rounded-2xl p-6 relative overflow-hidden group hover:border-amber/15 transition-colors`}
+              >
+                <div
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+                  style={{
+                    background: `radial-gradient(ellipse at 30% 20%, rgba(245,166,35,0.04), transparent 70%)`,
+                  }}
+                />
+                <div className="relative">
+                  <div className="text-2xl mb-3">{feature.icon}</div>
+                  <h3 className="font-semibold text-base mb-2">
+                    {feature.title}
+                  </h3>
+                  <p className="text-sm text-muted leading-relaxed">
+                    {feature.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ==================== PROOF ==================== */}
+      <section
+        className="relative z-10 px-5 py-16 sm:py-24"
+        ref={proofRef}
+      >
+        <div className="max-w-3xl mx-auto">
+          <div className="reveal text-center mb-14">
+            <p className="text-amber text-xs font-medium mb-3 uppercase tracking-widest">
+              Les resultats
+            </p>
+            <h2 className="text-2xl sm:text-3xl font-bold">
+              Des chiffres, pas des promesses.
+            </h2>
+          </div>
+
+          {/* Stats */}
+          <div className="reveal reveal-delay-1 glass rounded-2xl p-6 sm:p-8 mb-10">
+            <div className="grid grid-cols-3 gap-4 sm:gap-8">
+              <div ref={stat1.ref} className="text-center">
+                <p className="text-3xl sm:text-4xl font-bold text-amber">
+                  {stat1.count}
+                  <span className="text-2xl">%</span>
+                </p>
+                <p className="text-xs text-muted mt-1.5">
+                  voient une amelioration
+                  <br />
+                  en 4 semaines
+                </p>
+              </div>
+              <div ref={stat2.ref} className="text-center">
+                <p className="text-3xl sm:text-4xl font-bold text-amber">
+                  -{stat2.count}
+                  <span className="text-lg"> min</span>
+                </p>
+                <p className="text-xs text-muted mt-1.5">
+                  de temps
+                  <br />
+                  d&apos;endormissement
+                </p>
+              </div>
+              <div ref={stat3.ref} className="text-center">
+                <p className="text-3xl sm:text-4xl font-bold text-amber">
+                  {stat3.count.toLocaleString("fr-FR")}
+                </p>
+                <p className="text-xs text-muted mt-1.5">
+                  utilisateurs
+                  <br />
+                  de 18-28 ans
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Testimonials */}
+          <div className="space-y-4">
+            {testimonials.map((t, i) => (
+              <div
+                key={t.name}
+                className={`reveal reveal-delay-${i + 1} glass-light rounded-2xl p-5 sm:p-6`}
+              >
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber/20 to-orange/20 border border-amber/15 flex items-center justify-center text-amber font-bold text-sm flex-shrink-0">
+                    {t.avatar}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm font-semibold text-soft-white">
+                        {t.name}
+                      </span>
+                      <span className="text-xs text-muted-dark">
+                        — {t.context}
+                      </span>
+                    </div>
+                    <div className="flex gap-0.5 mb-2">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <span key={s} className="text-amber text-[10px]">
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                    <p className="text-sm text-soft-white/80 leading-relaxed mb-2">
+                      &ldquo;{t.text}&rdquo;
+                    </p>
+                    <span className="inline-block text-[10px] font-semibold text-amber glass-accent px-2.5 py-0.5 rounded-full">
+                      {t.result}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ==================== BEFORE / AFTER ==================== */}
+      <section className="relative z-10 px-5 py-16 sm:py-20">
+        <div className="max-w-2xl mx-auto">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="glass rounded-2xl p-5">
               <p className="text-rose text-xs font-medium uppercase tracking-widest mb-4">
-                Avant
+                Sans Nuit Calme
               </p>
               <div className="space-y-3">
                 {[
                   "Scroll au lit → endormissement 45+ min",
-                  "Anxiete, pensees en boucle, coeur qui bat",
-                  "3 cafes pour tenir, crash a 15h",
-                  "Zero motivation, zero concentration",
-                  "Stress → mal dormir → plus de stress → repeat",
+                  "Pensees en boucle, anxiete qui monte",
+                  "3 cafes, zero concentration",
+                  "Cercle vicieux : stress → insomnie → stress",
                 ].map((item) => (
                   <div key={item} className="flex items-start gap-2">
-                    <span className="text-rose/60 text-xs mt-0.5 flex-shrink-0">
+                    <span className="text-rose/50 text-xs mt-0.5 flex-shrink-0">
                       ✕
                     </span>
                     <p className="text-xs text-muted leading-relaxed">{item}</p>
@@ -639,19 +931,16 @@ export default function LandingPage() {
                 ))}
               </div>
             </div>
-
-            {/* After */}
             <div className="glass-accent rounded-2xl p-5">
               <p className="text-amber text-xs font-medium uppercase tracking-widest mb-4">
-                Apres
+                Avec Nuit Calme
               </p>
               <div className="space-y-3">
                 {[
-                  "Rituel de 10 min → tu t'endors sans t'en rendre compte",
+                  "Rituel de 10 min → endormi sans t'en rendre compte",
                   "Nuit complete, pas de reveil a 4h",
-                  "Tu te leves frais, sans alarme x5",
-                  "Concentration, energie stable toute la journee",
-                  "Moins de stress, meilleure humeur, tout suit",
+                  "Frais au reveil, energie stable",
+                  "Cercle vertueux : calme → sommeil → performance",
                 ].map((item) => (
                   <div key={item} className="flex items-start gap-2">
                     <span className="text-amber text-xs mt-0.5 flex-shrink-0">
@@ -665,263 +954,89 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-
-          <div className="reveal reveal-delay-2 text-center mt-6">
-            <p className="text-muted text-xs">
-              La plupart des utilisateurs voient la difference{" "}
-              <span className="text-soft-white font-medium">
-                des la premiere semaine
-              </span>
-              .
-            </p>
-          </div>
         </div>
       </section>
 
-      {/* ============================================ */}
-      {/* RITUAL PREVIEW — show the product            */}
-      {/* ============================================ */}
+      {/* ==================== COST ==================== */}
       <section
-        className="relative z-10 px-5 py-16 sm:py-20 overflow-hidden"
-        ref={ritualRef}
-      >
-        <div className="absolute inset-0 -z-10 pointer-events-none">
-          <Image
-            src="/images/moon-clouds.jpg"
-            alt=""
-            fill
-            className="object-cover opacity-12"
-            sizes="100vw"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-midnight via-midnight/90 to-midnight" />
-        </div>
-        <div className="max-w-4xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-10 items-center">
-            <div className="reveal order-2 md:order-1">
-              <p className="text-amber text-xs font-medium mb-3 uppercase tracking-widest">
-                Le rituel du soir
-              </p>
-              <h2 className="text-2xl sm:text-3xl font-bold mb-5 leading-tight">
-                10 min pour calmer ton cerveau.
-                <br />
-                <span className="text-amber">8h de vrai repos.</span>
-              </h2>
-              <div className="space-y-3 mb-6">
-                {[
-                  {
-                    icon: "💡",
-                    title: "Veilleuse adaptee",
-                    desc: "5 ambiances calibrees sur ta cause",
-                  },
-                  {
-                    icon: "🎵",
-                    title: "Sons d'ambiance",
-                    desc: "Pluie, ocean, foret — generes, pas en boucle",
-                  },
-                  {
-                    icon: "🫁",
-                    title: "Respiration guidee",
-                    desc: "4-7-8, coherence cardiaque, phase par phase",
-                  },
-                  {
-                    icon: "📱",
-                    title: "Sur ton telephone",
-                    desc: "S'installe comme une app native",
-                  },
-                ].map((item) => (
-                  <div key={item.title} className="flex items-start gap-3">
-                    <span className="text-base mt-0.5">{item.icon}</span>
-                    <div>
-                      <p className="text-sm font-medium text-soft-white">
-                        {item.title}
-                      </p>
-                      <p className="text-xs text-muted">{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <CTAButton size="md" text="Decouvrir mon rituel" />
-            </div>
-
-            <div className="reveal reveal-delay-2 order-1 md:order-2 flex justify-center">
-              <div className="relative w-52 sm:w-60">
-                <div className="rounded-[1.8rem] overflow-hidden glass-strong p-5 aspect-[9/16] flex flex-col items-center justify-center relative">
-                  <div
-                    className="absolute inset-0 opacity-25"
-                    style={{
-                      background:
-                        "radial-gradient(circle at 50% 35%, rgba(0,102,153,0.3), transparent 70%)",
-                    }}
-                  />
-                  <div className="relative w-16 h-16 mb-5">
-                    <div
-                      className="absolute inset-0 rounded-full blur-xl animate-breathe"
-                      style={{
-                        background:
-                          "radial-gradient(circle, #0077B6aa, #003366)",
-                      }}
-                    />
-                    <div
-                      className="absolute inset-3 rounded-full blur-md"
-                      style={{
-                        background:
-                          "radial-gradient(circle, #006699, #001F3F)",
-                      }}
-                    />
-                  </div>
-                  <p className="text-[#0077B6] text-sm font-medium mb-0.5 relative">
-                    Ocean profond
-                  </p>
-                  <p className="text-muted/30 text-[10px] mb-4 relative">
-                    Calme le systeme nerveux
-                  </p>
-                  <div className="w-full glass-light rounded-lg p-2.5 relative">
-                    <p className="text-[9px] text-muted/50 mb-1.5">
-                      Son d&apos;ambiance
-                    </p>
-                    <div className="flex gap-1.5">
-                      {["Pluie", "Ocean", "Foret"].map((s, i) => (
-                        <span
-                          key={s}
-                          className={`px-2 py-0.5 rounded-full text-[8px] ${i === 1 ? "glass-accent text-amber" : "glass text-muted/40"}`}
-                        >
-                          {s}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-14 h-3.5 rounded-full bg-midnight/80" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ============================================ */}
-      {/* OBJECTIONS — "Oui mais..."                   */}
-      {/* ============================================ */}
-      <section
-        className="relative z-10 px-5 py-16 sm:py-20"
-        ref={objectionsRef}
+        className="relative z-10 px-5 py-16 sm:py-24"
+        ref={costRef}
       >
         <div className="max-w-2xl mx-auto">
           <div className="reveal text-center mb-10">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-3">
-              &ldquo;Oui mais moi c&apos;est different...&rdquo;
-            </h2>
-            <p className="text-muted text-sm">
-              On a entendu ca 2 340 fois. Voici ce qu&apos;on repond.
+            <p className="text-amber text-xs font-medium mb-3 uppercase tracking-widest">
+              Le vrai cout
             </p>
+            <h2 className="text-2xl sm:text-3xl font-bold leading-tight">
+              Le manque de sommeil te coute
+              <br />
+              <span className="text-rose">
+                bien plus que tu ne crois
+              </span>
+            </h2>
           </div>
 
-          <div className="space-y-4">
-            {[
-              {
-                objection: "C'est juste du stress, ca va passer",
-                answer:
-                  "Le stress ne \"passe\" pas tout seul — il s'installe. 73% des 18-28 ans dorment mal a cause du stress. Plus tu attends, plus le cycle se renforce.",
-                icon: "😤",
-              },
-              {
-                objection: "J'ai deja essaye des apps de sommeil",
-                answer:
-                  "Elles te donnent un score. On te donne la CAUSE + un plan personnalise. Ton anxiete du soir n'a rien a voir avec un mauvais matelas — on cible le vrai probleme.",
-                icon: "📱",
-              },
-              {
-                objection: "J'ai pas le temps/la discipline pour un programme",
-                answer:
-                  "10 min le soir, c'est tout. Le rituel est guide — tu te laisses porter. Les micro-habitudes sont si petites que tu ne peux pas echouer. Concu pour les gens qui n'arrivent pas a tenir.",
-                icon: "⏱️",
-              },
-              {
-                objection: "C'est cher, je suis etudiant",
-                answer:
-                  "Le diagnostic est 100% gratuit. Le programme revient a 0.33€/jour — moins qu'un cafe. Et combien te coute le manque de sommeil en concentration, notes, et sante ?",
-                icon: "💸",
-              },
-            ].map((item, i) => (
-              <div
-                key={i}
-                className={`reveal reveal-delay-${i + 1} glass rounded-2xl p-5`}
-              >
-                <div className="flex items-start gap-3">
-                  <span className="text-xl mt-0.5 flex-shrink-0">
-                    {item.icon}
-                  </span>
-                  <div>
-                    <p className="font-semibold text-sm mb-2 text-soft-white">
-                      &ldquo;{item.objection}&rdquo;
-                    </p>
-                    <p className="text-sm text-muted leading-relaxed">
-                      {item.answer}
-                    </p>
-                  </div>
+          <div className="reveal reveal-delay-1 glass rounded-2xl p-6 sm:p-8 mb-6">
+            <p className="text-xs text-muted text-center mb-5 uppercase tracking-wider">
+              Ce que tu paies deja chaque jour
+            </p>
+            <div className="grid grid-cols-3 gap-3 sm:gap-6 text-center mb-6">
+              {[
+                {
+                  value: "3-5",
+                  unit: "cafes/j",
+                  cost: "4-8€/jour",
+                },
+                {
+                  value: "-40%",
+                  unit: "focus",
+                  cost: "notes, productivite",
+                },
+                {
+                  value: "x2",
+                  unit: "risque",
+                  cost: "ta sante mentale",
+                },
+              ].map((item) => (
+                <div key={item.unit}>
+                  <p className="text-xl sm:text-2xl font-bold text-rose">
+                    {item.value}
+                  </p>
+                  <p className="text-[10px] text-rose/60 mb-1">{item.unit}</p>
+                  <p className="text-[9px] text-muted-dark">{item.cost}</p>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+            <div className="h-px bg-white/5 mb-5" />
+            <div className="text-center">
+              <p className="text-xs text-muted mb-2">Nuit Calme</p>
+              <p className="text-2xl sm:text-3xl font-bold text-amber mb-1">
+                0,16€
+                <span className="text-base font-normal text-muted">
+                  /jour
+                </span>
+              </p>
+              <p className="text-xs text-muted">
+                Moins qu&apos;un cafe. Pour reparer tes nuits.
+              </p>
+            </div>
+          </div>
+
+          <div className="reveal reveal-delay-2 text-center">
+            <CTAButton size="md" text="Commencer gratuitement" />
           </div>
         </div>
       </section>
 
-      {/* ============================================ */}
-      {/* SECOND TESTIMONIALS                          */}
-      {/* ============================================ */}
-      <section className="relative z-10 py-4">
-        <ScrollingTestimonials />
-      </section>
-
-      {/* ============================================ */}
-      {/* FINAL CTA                                    */}
-      {/* ============================================ */}
-      <section
-        className="relative z-10 px-5 py-16 sm:py-24 overflow-hidden"
-        ref={ctaRef}
-      >
-        <div className="absolute inset-0 -z-10 pointer-events-none">
-          <Image
-            src="/images/night-lake.jpg"
-            alt=""
-            fill
-            className="object-cover opacity-15"
-            sizes="100vw"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-midnight via-midnight/80 to-midnight" />
-        </div>
-        <div className="reveal max-w-xl mx-auto text-center glass rounded-3xl p-8 sm:p-12 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-amber/5 via-transparent to-orange/5 pointer-events-none" />
-          <div className="text-4xl mb-4">🌙</div>
-          <h2 className="text-2xl sm:text-3xl font-bold mb-3 relative">
-            Arrete de subir tes nuits.
-            <br />
-            <span className="text-amber">Reprends le controle ce soir.</span>
-          </h2>
-          <p className="text-muted text-sm sm:text-base mb-8 relative max-w-sm mx-auto">
-            2 min de diagnostic. 1 cause identifiee. 1 plan.
-            <br />
-            Des la premiere semaine, tu sens la difference.
-          </p>
-          <div className="relative flex flex-col items-center gap-3">
-            <CTAButton text="Faire mon diagnostic maintenant" />
-            <span className="text-[10px] text-muted-dark">
-              Gratuit · Sans inscription · Resultat immediat
-            </span>
-          </div>
-        </div>
-      </section>
-
-      {/* ============================================ */}
-      {/* FAQ                                          */}
-      {/* ============================================ */}
+      {/* ==================== FAQ ==================== */}
       <section
         id="faq"
-        className="relative z-10 px-5 py-16 sm:py-20"
+        className="relative z-10 px-5 py-16 sm:py-24"
         ref={faqRef}
       >
         <div className="max-w-xl mx-auto">
-          <div className="reveal">
-            <h2 className="text-2xl sm:text-3xl font-bold text-center mb-10">
+          <div className="reveal text-center mb-10">
+            <h2 className="text-2xl sm:text-3xl font-bold">
               Questions frequentes
             </h2>
           </div>
@@ -931,7 +1046,72 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
+      {/* ==================== FINAL CTA ==================== */}
+      <section
+        className="relative z-10 px-5 py-16 sm:py-24 overflow-hidden"
+        ref={ctaRef}
+      >
+        <div className="absolute inset-0 -z-10 pointer-events-none">
+          <Image
+            src="/images/night-lake.jpg"
+            alt=""
+            fill
+            className="object-cover opacity-12"
+            sizes="100vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-midnight via-midnight/80 to-midnight" />
+        </div>
+        <div className="reveal max-w-lg mx-auto text-center glass rounded-3xl p-8 sm:p-12 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-amber/5 via-transparent to-orange/5 pointer-events-none" />
+
+          <div className="relative">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-amber/20 to-orange/20 border border-amber/15 flex items-center justify-center mx-auto mb-5">
+              <span className="text-2xl">🌙</span>
+            </div>
+
+            <h2 className="text-2xl sm:text-3xl font-bold mb-3 leading-tight">
+              Chaque nuit perdue
+              <br />
+              <span className="text-amber">renforce le cycle.</span>
+            </h2>
+            <p className="text-muted text-sm sm:text-base mb-8 max-w-xs mx-auto leading-relaxed">
+              Ce soir, tu peux commencer a le casser. 2 min de diagnostic.
+              1 cause. 1 plan.
+            </p>
+
+            <div className="flex flex-col items-center gap-3">
+              <CTAButton text="Faire mon diagnostic maintenant" />
+              <div className="flex items-center gap-2 text-[10px] text-muted-dark">
+                <span>🔒 Gratuit</span>
+                <span>·</span>
+                <span>Sans inscription</span>
+                <span>·</span>
+                <span>Resultat immediat</span>
+              </div>
+            </div>
+
+            <div className="mt-6 pt-5 border-t border-white/5">
+              <div className="flex items-center justify-center gap-2">
+                <div className="flex -space-x-1.5">
+                  {["L", "T", "S", "J"].map((l, i) => (
+                    <div
+                      key={i}
+                      className="w-6 h-6 rounded-full glass border border-midnight flex items-center justify-center text-[9px] text-amber font-medium"
+                    >
+                      {l}
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[10px] text-muted">
+                  +2 340 personnes dorment mieux ce soir
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ==================== FOOTER ==================== */}
       <footer className="relative z-10 px-5 py-6 border-t border-white/5">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-muted text-sm">
@@ -957,6 +1137,9 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* Bottom padding for sticky CTA on mobile */}
+      <div className="h-16 sm:hidden" />
     </div>
   );
 }
