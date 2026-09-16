@@ -166,7 +166,6 @@ function LockedResultsPhase({
   const data =
     causeConsequences[verdict.primaryCause] ?? causeConsequences.no_routine;
   const yearsLost = score < 30 ? "5-7" : score < 50 ? "3-5" : "1-3";
-  const targetScore = Math.min(score + 35, 92);
 
   const circumference = 2 * Math.PI * 54;
   const offset = circumference - (score / 100) * circumference;
@@ -292,36 +291,22 @@ function LockedResultsPhase({
             </span>
           </p>
 
-          {/* Mini score preview */}
+          {/* Locked preview — no score shown */}
           <div className="glass rounded-2xl p-4 mb-5 text-left">
             <div className="flex items-center gap-4 mb-3">
-              <div className="relative w-12 h-12 flex-shrink-0">
-                <svg viewBox="0 0 120 120" className="w-full h-full -rotate-90">
-                  <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(155,122,235,0.1)" strokeWidth="8" />
-                  <circle
-                    cx="60" cy="60" r="54" fill="none"
-                    stroke={score >= 75 ? "#10b981" : score >= 50 ? "#f5a623" : score >= 30 ? "#f0725c" : "#f43f5e"}
-                    strokeWidth="8" strokeLinecap="round"
-                    strokeDasharray={circumference}
-                    strokeDashoffset={circumference - (score / 100) * circumference}
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className={`text-sm font-bold ${color}`}>{score}</span>
-                </div>
+              <div className="w-12 h-12 rounded-full glass-accent flex items-center justify-center flex-shrink-0">
+                <span className="text-lg">{"\u{1F512}"}</span>
               </div>
               <div>
                 <p className="text-soft-white font-semibold text-sm">
-                  Score : <span className="text-rose">{score}</span>
-                  {" → "}
-                  <span className="text-mint">{targetScore}</span>
+                  Ton score est calcule
                 </p>
-                <p className="text-xs text-muted">en 4 semaines</p>
+                <p className="text-xs text-muted">Cause identifiee. Programme pret.</p>
               </div>
             </div>
             <div className="space-y-2">
               {[
-                "\u{1F3AF} Programme personnalise contre " + causeLabels[verdict.primaryCause],
+                "\u{1F3AF} Programme personnalise 4 semaines",
                 "\u{1F319} Rituel du soir guide — 10 min",
                 "\u{1F4CA} Suivi quotidien de tes progres",
               ].map((text) => (
