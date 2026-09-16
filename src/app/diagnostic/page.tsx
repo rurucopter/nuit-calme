@@ -1,19 +1,13 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { questions, analyzeDiagnostic } from "@/lib/diagnostic";
 import { generatePlan } from "@/lib/plans";
 import { saveUserData } from "@/lib/storage";
 import { DiagnosticAnswers, Verdict } from "@/lib/types";
 
-type FunnelPhase =
-  | "quiz"
-  | "analyzing"
-  | "score"
-  | "consequences"
-  | "solution"
-  | "done";
+type FunnelPhase = "quiz" | "analyzing" | "locked";
 
 const causeLabels: Record<string, string> = {
   screen_addiction: "addiction aux ecrans",
@@ -26,12 +20,12 @@ const causeLabels: Record<string, string> = {
 
 const causeConsequences: Record<string, { icon: string; lines: string[] }> = {
   screen_addiction: {
-    icon: "📱",
+    icon: "\u{1F4F1}",
     lines: [
       "La lumiere bleue detruit ta melatonine depuis des mois",
       "Ton cerveau est encore en alerte quand tu fermes les yeux",
       "Chaque scroll repousse ton endormissement de 15 a 30 min",
-      "Ton sommeil profond est reduit de 20% — tu ne recuperes plus vraiment",
+      "Ton sommeil profond est reduit de 20%",
     ],
   },
   late_caffeine: {
@@ -44,7 +38,7 @@ const causeConsequences: Record<string, { icon: string; lines: string[] }> = {
     ],
   },
   stress_rumination: {
-    icon: "🧠",
+    icon: "\u{1F9E0}",
     lines: [
       "Ton systeme nerveux est bloque en mode combat permanent",
       "Ton cortisol monte au moment exact ou il devrait baisser",
@@ -62,7 +56,7 @@ const causeConsequences: Record<string, { icon: string; lines: string[] }> = {
     ],
   },
   late_exercise: {
-    icon: "🏃",
+    icon: "\u{1F3C3}",
     lines: [
       "Le sport du soir booste ton adrenaline au mauvais moment",
       "Ta temperature corporelle reste elevee 2-3h apres l'effort",
@@ -71,7 +65,7 @@ const causeConsequences: Record<string, { icon: string; lines: string[] }> = {
     ],
   },
   no_routine: {
-    icon: "🌙",
+    icon: "\u{1F319}",
     lines: [
       "Ton cerveau n'a aucun signal pour comprendre que c'est fini",
       "Tu passes du mode actif au mode dodo sans transition",
@@ -159,339 +153,216 @@ function AnalyzingPhase({ onDone }: { onDone: () => void }) {
   );
 }
 
-function ScoreRevealPhase({
+function LockedResultsPhase({
   score,
   verdict,
-  onDone,
 }: {
   score: number;
   verdict: Verdict;
-  onDone: () => void;
 }) {
-  const [phase, setPhase] = useState(0);
+  const router = useRouter();
   const [displayScore, setDisplayScore] = useState(100);
+  const [blurred, setBlurred] = useState(false);
+  const [showOverlay, setShowOverlay] = useState(false);
   const { label, color } = getScoreLabel(score);
-
-  useEffect(() => {
-    const t1 = setTimeout(() => setPhase(1), 400);
-    const t2 = setTimeout(() => {
-      let current = 100;
-      const interval = setInterval(() => {
-        current -= 1;
-        if (current <= score) {
-          current = score;
-          clearInterval(interval);
-        }
-        setDisplayScore(current);
-      }, 15);
-    }, 800);
-    const t3 = setTimeout(() => setPhase(2), 2500);
-    const t4 = setTimeout(() => setPhase(3), 4000);
-    const t5 = setTimeout(onDone, 6000);
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
-      clearTimeout(t4);
-      clearTimeout(t5);
-    };
-  }, [score, onDone]);
+  const data =
+    causeConsequences[verdict.primaryCause] ?? causeConsequences.no_routine;
+  const yearsLost = score < 30 ? "5-7" : score < 50 ? "3-5" : "1-3";
+  const targetScore = Math.min(score + 35, 92);
 
   const circumference = 2 * Math.PI * 54;
   const offset = circumference - (displayScore / 100) * circumference;
 
+  useEffect(() => {
+    let current = 100;
+    const interval = setInterval(() => {
+      current -= 1;
+      if (current <= score) {
+        current = score;
+        clearInterval(interval);
+      }
+      setDisplayScore(current);
+    }, 15);
+
+    const t1 = setTimeout(() => setBlurred(true), 2800);
+    const t2 = setTimeout(() => setShowOverlay(true), 3200);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [score]);
+
   return (
-    <div className="min-h-dvh flex flex-col items-center justify-center px-6">
-      <div className="max-w-sm w-full text-center">
-        <p
-          className={`text-xs uppercase tracking-widest text-muted-dark mb-6 transition-all duration-700 ${phase >= 1 ? "opacity-100" : "opacity-0"}`}
-        >
-          Ton score de sommeil
-        </p>
-
-        <div
-          className={`relative w-40 h-40 mx-auto mb-6 transition-all duration-700 ${phase >= 1 ? "opacity-100 scale-100" : "opacity-0 scale-50"}`}
-        >
-          <svg viewBox="0 0 120 120" className="w-full h-full -rotate-90">
-            <circle
-              cx="60"
-              cy="60"
-              r="54"
-              fill="none"
-              stroke="rgba(155,122,235,0.1)"
-              strokeWidth="8"
-            />
-            <circle
-              cx="60"
-              cy="60"
-              r="54"
-              fill="none"
-              stroke={
-                score >= 75
-                  ? "#10b981"
-                  : score >= 50
-                    ? "#f5a623"
-                    : score >= 30
-                      ? "#f0725c"
-                      : "#f43f5e"
-              }
-              strokeWidth="8"
-              strokeLinecap="round"
-              strokeDasharray={circumference}
-              strokeDashoffset={offset}
-              className="transition-all duration-100"
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className={`text-4xl font-bold ${color}`}>
-              {displayScore}
-            </span>
-            <span className="text-[10px] text-muted-dark">/100</span>
+    <div className="min-h-dvh relative overflow-hidden">
+      {/* Background: score + consequences — gets blurred */}
+      <div
+        className="min-h-dvh flex flex-col items-center justify-start px-6 pt-12 pb-32 transition-all duration-1000"
+        style={{
+          filter: blurred ? "blur(12px)" : "blur(0px)",
+          transform: blurred ? "scale(1.02)" : "scale(1)",
+          pointerEvents: blurred ? "none" : "auto",
+        }}
+      >
+        <div className="max-w-md w-full text-center">
+          {/* Score circle */}
+          <p className="text-xs uppercase tracking-widest text-muted-dark mb-4">
+            Ton score de sommeil
+          </p>
+          <div className="relative w-36 h-36 mx-auto mb-4">
+            <svg viewBox="0 0 120 120" className="w-full h-full -rotate-90">
+              <circle
+                cx="60" cy="60" r="54" fill="none"
+                stroke="rgba(155,122,235,0.1)" strokeWidth="8"
+              />
+              <circle
+                cx="60" cy="60" r="54" fill="none"
+                stroke={
+                  score >= 75 ? "#10b981" : score >= 50 ? "#f5a623" : score >= 30 ? "#f0725c" : "#f43f5e"
+                }
+                strokeWidth="8" strokeLinecap="round"
+                strokeDasharray={circumference}
+                strokeDashoffset={offset}
+                className="transition-all duration-100"
+              />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className={`text-4xl font-bold ${color}`}>{displayScore}</span>
+              <span className="text-[10px] text-muted-dark">/100</span>
+            </div>
           </div>
-        </div>
 
-        <div
-          className={`transition-all duration-700 ${phase >= 2 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
-        >
-          <div
-            className={`inline-block glass-accent rounded-full px-4 py-1.5 mb-4`}
-          >
-            <span className={`text-sm font-bold ${color}`}>
-              Niveau : {label}
-            </span>
+          <div className="inline-block glass-accent rounded-full px-4 py-1.5 mb-3">
+            <span className={`text-sm font-bold ${color}`}>Niveau : {label}</span>
           </div>
-          <h2 className="text-xl font-bold mb-2">{verdict.title}</h2>
-          <p className="text-sm text-muted">
+          <h2 className="text-xl font-bold mb-1">{verdict.title}</h2>
+          <p className="text-sm text-muted mb-8">
             Cause principale :{" "}
             <span className="text-soft-white font-medium">
               {causeLabels[verdict.primaryCause]}
             </span>
           </p>
-        </div>
 
-        <p
-          className={`text-xs text-muted-dark mt-6 transition-all duration-700 ${phase >= 3 ? "opacity-100" : "opacity-0"}`}
-        >
-          Voici ce que ca fait a ton corps...
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function ConsequencesPhase({
-  verdict,
-  score,
-  onDone,
-}: {
-  verdict: Verdict;
-  score: number;
-  onDone: () => void;
-}) {
-  const [lineIndex, setLineIndex] = useState(-1);
-  const [showCost, setShowCost] = useState(false);
-  const data =
-    causeConsequences[verdict.primaryCause] ?? causeConsequences.no_routine;
-
-  useEffect(() => {
-    const timers: NodeJS.Timeout[] = [];
-    data.lines.forEach((_, i) => {
-      timers.push(setTimeout(() => setLineIndex(i), 800 + i * 1500));
-    });
-    timers.push(
-      setTimeout(() => setShowCost(true), 800 + data.lines.length * 1500 + 800)
-    );
-    timers.push(
-      setTimeout(onDone, 800 + data.lines.length * 1500 + 3500)
-    );
-    return () => timers.forEach(clearTimeout);
-  }, [data, onDone]);
-
-  const yearsLost = score < 30 ? "5-7" : score < 50 ? "3-5" : "1-3";
-
-  return (
-    <div className="min-h-dvh flex flex-col items-center justify-center px-6">
-      <div className="max-w-md w-full text-center">
-        <div
-          className={`text-5xl mb-6 transition-all duration-700 ${
-            lineIndex >= 0 ? "scale-100 opacity-100" : "scale-50 opacity-0"
-          }`}
-        >
-          {data.icon}
-        </div>
-        <h2
-          className={`text-xl font-bold mb-2 transition-all duration-700 ${
-            lineIndex >= 0 ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          {verdict.title}
-        </h2>
-        <div
-          className="glass-accent rounded-2xl px-4 py-2 inline-block mb-8 transition-all duration-700"
-          style={{ opacity: lineIndex >= 0 ? 1 : 0 }}
-        >
-          <span className="text-amber font-bold">{verdict.stat}</span>
-          <span className="text-amber/60 text-xs ml-2">
-            {verdict.statLabel}
-          </span>
-        </div>
-
-        <div className="space-y-4 text-left">
-          {data.lines.map((line, i) => (
-            <div
-              key={i}
-              className={`flex items-start gap-3 transition-all duration-700 ${
-                i <= lineIndex
-                  ? "opacity-100 translate-x-0"
-                  : "opacity-0 -translate-x-4"
-              }`}
-            >
-              <div className="w-6 h-6 rounded-full bg-rose/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-rose text-xs">!</span>
-              </div>
-              <p className="text-sm text-muted leading-relaxed">{line}</p>
-            </div>
-          ))}
-        </div>
-
-        <div
-          className={`mt-8 glass rounded-2xl p-5 transition-all duration-1000 ${showCost ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
-        >
-          <p className="text-rose text-xs uppercase tracking-widest mb-3 font-medium">
-            Ce que ca te coute
-          </p>
-          <div className="grid grid-cols-3 gap-3">
-            {[
-              { value: "-40%", label: "concentration" },
-              { value: yearsLost + " ans", label: "esperance de vie" },
-              { value: "x2", label: "risque burn-out" },
-            ].map((item) => (
-              <div key={item.label} className="text-center">
-                <p className="text-lg font-bold text-rose">{item.value}</p>
-                <p className="text-[9px] text-muted-dark">{item.label}</p>
+          {/* Consequences */}
+          <div className="text-5xl mb-4">{data.icon}</div>
+          <div className="space-y-3 text-left mb-6">
+            {data.lines.map((line, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <div className="w-5 h-5 rounded-full bg-rose/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-rose text-[10px]">!</span>
+                </div>
+                <p className="text-sm text-muted leading-relaxed">{line}</p>
               </div>
             ))}
           </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
-function SolutionPhase({ verdict, score, onDone }: { verdict: Verdict; score: number; onDone: () => void }) {
-  const [step, setStep] = useState(0);
-
-  useEffect(() => {
-    const timers = [
-      setTimeout(() => setStep(1), 500),
-      setTimeout(() => setStep(2), 1800),
-      setTimeout(() => setStep(3), 3200),
-      setTimeout(() => setStep(4), 4500),
-    ];
-    return () => timers.forEach(clearTimeout);
-  }, []);
-
-  const targetScore = Math.min(score + 35, 92);
-
-  return (
-    <div className="min-h-dvh flex flex-col items-center justify-center px-6">
-      <div className="max-w-md w-full text-center">
-        <div
-          className={`transition-all duration-700 ${
-            step >= 1 ? "opacity-100 scale-100" : "opacity-0 scale-75"
-          }`}
-        >
-          <div className="text-4xl mb-3">✨</div>
-          <p className="text-amber text-xs uppercase tracking-widest font-medium mb-2">
-            Bonne nouvelle
-          </p>
-        </div>
-
-        <h2
-          className={`text-2xl sm:text-3xl font-bold mb-4 transition-all duration-700 ${
-            step >= 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          }`}
-        >
-          On peut{" "}
-          <span className="bg-gradient-to-r from-amber to-orange bg-clip-text text-transparent">
-            reparer ca
-          </span>
-        </h2>
-
-        <p
-          className={`text-muted text-sm leading-relaxed mb-6 transition-all duration-700 ${
-            step >= 1 ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          Ta cause est identifiee. On a deja aide 2 340 personnes avec
-          exactement le meme profil que toi.
-        </p>
-
-        <div
-          className={`glass rounded-2xl p-5 mb-4 text-left transition-all duration-700 ${
-            step >= 2 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          }`}
-        >
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-xs text-amber uppercase tracking-widest font-medium">
-              Ton programme personnalise
+          {/* Cost card */}
+          <div className="glass rounded-2xl p-4">
+            <p className="text-rose text-xs uppercase tracking-widest mb-3 font-medium">
+              Ce que ca te coute
             </p>
-            <span className="text-[10px] glass-accent px-2 py-0.5 rounded-full text-amber font-bold">
-              adapte a ta cause
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { value: "-40%", l: "concentration" },
+                { value: yearsLost + " ans", l: "esperance de vie" },
+                { value: "x2", l: "risque burn-out" },
+              ].map((item) => (
+                <div key={item.l} className="text-center">
+                  <p className="text-lg font-bold text-rose">{item.value}</p>
+                  <p className="text-[9px] text-muted-dark">{item.l}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Overlay CTA — appears when blur kicks in */}
+      <div
+        className="fixed inset-0 z-50 flex flex-col items-center justify-center px-6 transition-all duration-700"
+        style={{
+          opacity: showOverlay ? 1 : 0,
+          pointerEvents: showOverlay ? "auto" : "none",
+        }}
+      >
+        {/* Gradient scrim — thin enough to see blurred content underneath */}
+        <div className="absolute inset-0 bg-gradient-to-b from-midnight/40 via-midnight/60 to-midnight/85" />
+
+        <div className="relative z-10 max-w-sm w-full text-center">
+          {/* Lock icon */}
+          <div className="w-16 h-16 rounded-full glass-accent flex items-center justify-center mx-auto mb-5">
+            <span className="text-3xl">{"\u{1F512}"}</span>
+          </div>
+
+          <h2 className="text-2xl sm:text-3xl font-bold mb-3 leading-tight">
+            Ton bilan est{" "}
+            <span className="bg-gradient-to-r from-amber to-orange bg-clip-text text-transparent">
+              pret
             </span>
-          </div>
-          <div className="space-y-3">
-            {[
-              { icon: "🎯", text: "Plan de 4 semaines contre : " + causeLabels[verdict.primaryCause] },
-              { icon: "🌙", text: "Rituel du soir guide — 10 min pour couper ton cerveau" },
-              { icon: "📊", text: "Suivi quotidien de tes progres + detection de patterns" },
-              { icon: "🔊", text: "Sons d'ambiance + respiration guidee personnalises" },
-              { icon: "✅", text: "Micro-habitudes pour ancrer le changement sans effort" },
-            ].map((item) => (
-              <div key={item.text} className="flex items-center gap-3">
-                <span className="text-base">{item.icon}</span>
-                <span className="text-sm text-muted">{item.text}</span>
+          </h2>
+
+          <p className="text-muted text-sm leading-relaxed mb-6 max-w-xs mx-auto">
+            10 min/soir. 4 semaines.{" "}
+            <span className="text-soft-white font-medium">
+              Ton sommeil repare.
+            </span>
+          </p>
+
+          {/* Mini score preview */}
+          <div className="glass rounded-2xl p-4 mb-5 text-left">
+            <div className="flex items-center gap-4 mb-3">
+              <div className="relative w-12 h-12 flex-shrink-0">
+                <svg viewBox="0 0 120 120" className="w-full h-full -rotate-90">
+                  <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(155,122,235,0.1)" strokeWidth="8" />
+                  <circle
+                    cx="60" cy="60" r="54" fill="none"
+                    stroke={score >= 75 ? "#10b981" : score >= 50 ? "#f5a623" : score >= 30 ? "#f0725c" : "#f43f5e"}
+                    strokeWidth="8" strokeLinecap="round"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={circumference - (score / 100) * circumference}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className={`text-sm font-bold ${color}`}>{score}</span>
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
-
-        <div
-          className={`glass-accent rounded-2xl p-4 mb-6 transition-all duration-700 ${
-            step >= 3 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-muted mb-1">Objectif realiste</p>
-              <p className="text-sm font-semibold text-soft-white">
-                Score :{" "}
-                <span className="text-rose">{score}</span>
-                {" → "}
-                <span className="text-mint">{targetScore}</span>
-                <span className="text-muted text-xs ml-1">en 4 semaines</span>
-              </p>
+              <div>
+                <p className="text-soft-white font-semibold text-sm">
+                  Score : <span className="text-rose">{score}</span>
+                  {" → "}
+                  <span className="text-mint">{targetScore}</span>
+                </p>
+                <p className="text-xs text-muted">en 4 semaines</p>
+              </div>
             </div>
-            <div className="flex flex-col items-end">
-              <span className="text-xs text-muted">Taux de reussite</span>
-              <span className="text-amber font-bold text-lg">87%</span>
+            <div className="space-y-2">
+              {[
+                "\u{1F3AF} Programme personnalise contre " + causeLabels[verdict.primaryCause],
+                "\u{1F319} Rituel du soir guide — 10 min",
+                "\u{1F4CA} Suivi quotidien de tes progres",
+              ].map((text) => (
+                <p key={text} className="text-xs text-muted">{text}</p>
+              ))}
             </div>
           </div>
-        </div>
 
-        <div
-          className={`transition-all duration-700 ${
-            step >= 4 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          }`}
-        >
+          {/* Social proof line */}
+          <p className="text-xs text-muted mb-4">
+            <span className="text-amber font-bold">87%</span> de reussite —{" "}
+            <span className="text-soft-white/80">+2 340 personnes</span> comme toi
+          </p>
+
+          {/* Main CTA */}
           <button
-            onClick={onDone}
-            className="w-full px-8 py-4 rounded-2xl glass-btn-solid text-midnight font-semibold text-lg hover:scale-[1.02] active:scale-[0.98]"
+            onClick={() => router.push("/offre")}
+            className="w-full px-8 py-4 rounded-2xl glass-btn-solid text-midnight font-bold text-lg hover:scale-[1.02] active:scale-[0.98] mb-3"
           >
-            Debloquer mon programme
+            Voir mon plan personnalise
           </button>
-          <p className="text-[10px] text-muted-dark mt-3">
-            Resultat visible des la 1ere semaine · Satisfait ou rembourse
+
+          <p className="text-[10px] text-muted-dark">
+            0,16€/jour · Satisfait ou rembourse 14j · Resultat des la 1ere semaine
           </p>
         </div>
       </div>
@@ -549,37 +420,14 @@ export default function DiagnosticPage() {
     [answers, currentQ, isTransitioning, question, totalQuestions]
   );
 
-  const goToScore = useCallback(() => setPhase("score"), []);
-  const goToConsequences = useCallback(() => setPhase("consequences"), []);
-  const goToSolution = useCallback(() => setPhase("solution"), []);
-  const goToPaywall = useCallback(() => router.push("/offre"), [router]);
+  const goToLocked = useCallback(() => setPhase("locked"), []);
 
   if (phase === "analyzing") {
-    return <AnalyzingPhase onDone={goToScore} />;
+    return <AnalyzingPhase onDone={goToLocked} />;
   }
 
-  if (phase === "score" && verdict) {
-    return (
-      <ScoreRevealPhase
-        score={sleepScore}
-        verdict={verdict}
-        onDone={goToConsequences}
-      />
-    );
-  }
-
-  if (phase === "consequences" && verdict) {
-    return (
-      <ConsequencesPhase
-        verdict={verdict}
-        score={sleepScore}
-        onDone={goToSolution}
-      />
-    );
-  }
-
-  if (phase === "solution" && verdict) {
-    return <SolutionPhase verdict={verdict} score={sleepScore} onDone={goToPaywall} />;
+  if (phase === "locked" && verdict) {
+    return <LockedResultsPhase score={sleepScore} verdict={verdict} />;
   }
 
   return (
