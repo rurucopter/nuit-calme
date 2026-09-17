@@ -60,6 +60,60 @@ function useCountUp(target: number, duration = 1500) {
   return { count, ref };
 }
 
+function FloatingOrbs() {
+  return (
+    <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+      <div
+        className="absolute animate-float-orb-1"
+        style={{
+          top: "12%", left: "8%", width: 220, height: 220, borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(245,166,35,0.07), transparent 70%)",
+          filter: "blur(50px)",
+        }}
+      />
+      <div
+        className="absolute animate-float-orb-2"
+        style={{
+          top: "55%", right: "5%", width: 280, height: 280, borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(155,122,235,0.05), transparent 70%)",
+          filter: "blur(60px)",
+        }}
+      />
+      <div
+        className="absolute animate-float-orb-3"
+        style={{
+          bottom: "15%", left: "25%", width: 200, height: 200, borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(240,114,92,0.04), transparent 70%)",
+          filter: "blur(40px)",
+        }}
+      />
+      <div
+        className="absolute animate-float-orb-2"
+        style={{
+          top: "30%", right: "30%", width: 150, height: 150, borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(16,185,129,0.03), transparent 70%)",
+          filter: "blur(35px)",
+        }}
+      />
+    </div>
+  );
+}
+
+function useLiveCount(base: number, range: number) {
+  const [count, setCount] = useState(base);
+  useEffect(() => {
+    setCount(base + Math.floor(Math.random() * range));
+    const id = setInterval(() => {
+      setCount((prev) => {
+        const delta = Math.random() > 0.5 ? 1 : -1;
+        return Math.max(base, Math.min(base + range, prev + delta));
+      });
+    }, 3000 + Math.random() * 4000);
+    return () => clearInterval(id);
+  }, [base, range]);
+  return count;
+}
+
 function LiveNightSky() {
   const [stars, setStars] = useState<
     { x: number; y: number; size: number; delay: number; dur: number }[]
@@ -310,9 +364,11 @@ export default function LandingPage() {
   const stat1 = useCountUp(87);
   const stat2 = useCountUp(35);
   const stat3 = useCountUp(2340);
+  const liveCount = useLiveCount(12, 8);
 
   return (
     <div className="relative overflow-x-hidden">
+      <FloatingOrbs />
       <StickyMobileCTA />
 
       {/* ==================== HERO ==================== */}
@@ -417,6 +473,17 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+        {/* Live counter */}
+        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-10 animate-fade-in delay-700 opacity-0">
+          <div className="flex items-center gap-2 glass-light rounded-full px-4 py-2">
+            <div className="w-2 h-2 rounded-full bg-mint animate-pulse" />
+            <p className="text-[11px] text-muted">
+              <span className="text-soft-white font-medium">{liveCount} personnes</span>{" "}
+              font le diagnostic en ce moment
+            </p>
+          </div>
+        </div>
 
         {/* Scroll indicator */}
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 animate-float">
